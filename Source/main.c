@@ -17,6 +17,8 @@
 int main(void)
 {
 	
+	dprintf("Load here!");
+	
 	//System initialization
 	SystemInit();
 	

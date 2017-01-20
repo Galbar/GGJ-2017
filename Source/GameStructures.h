@@ -59,6 +59,8 @@ typedef struct
 		bool Active;
 		// Player has locked the camera at a determined aircraft
 		bool LockTarget;
+		
+	uint8_t ID;
 	
 	bool	(*PadKeyPressed_Callback)(unsigned short);
 	bool	(*PadKeyReleased_Callback)(unsigned short);

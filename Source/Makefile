@@ -4,7 +4,7 @@ LIBS= -lfixmath
 CC_FLAGS = -Wall -Werror -c -Os
 LINKER = psx-gcc
 
-PROJECT = DEATHBALL
+PROJECT = DBALL
 PROJECT_DIR = ~/DeathBall
 
 ELF2EXE = elf2exe
