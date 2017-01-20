@@ -21,47 +21,22 @@ typedef struct t_Camera
 	uint8_t Speed_Timer;
 }TYPE_CAMERA;
 
-typedef enum t_flstate
-{
-	STATE_IDLE = 0,
-	STATE_PARKED,
-	STATE_TAXIING,
-	STATE_TAKEOFF,
-	STATE_APPROACH,
-	STATE_FINAL,
-	STATE_LANDED
-}FL_STATE;
 
-typedef struct t_isopos
-{
-	short x;
-	short y;
-	short z;
-}TYPE_ISOMETRIC_POS;
-
-typedef struct t_isofix16pos
+typedef struct t_vector
 {
 	fix16_t x;
 	fix16_t y;
-	fix16_t z;
-}TYPE_ISOMETRIC_FIX16_POS;
+}TYPE_VECTOR;
 
-typedef struct t_cartpos
+typedef struct t_player
 {
-	short x;
-	short y;
-}TYPE_CARTESIAN_POS;
+	bool dead;
+	uint8_t wind_slots;
+	uint16_t hits;
+	fix16_t radius;
+	TYPE_VECTOR position;
+	TYPE_VECTOR speed;
 
-typedef struct
-{
-	// ## State flags ##
-		// Player is on the game
-		bool Active;
-		// Player has locked the camera at a determined aircraft
-		bool LockTarget;
-		
-	uint8_t ID;
-	
 	bool	(*PadKeyPressed_Callback)(unsigned short);
 	bool	(*PadKeyReleased_Callback)(unsigned short);
 	bool	(*PadDirectionKeyPressed_Callback)(void);

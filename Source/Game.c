@@ -52,7 +52,7 @@ static GsSprite GameMouseSpr;
 TYPE_PLAYER PlayerData[MAX_PLAYERS];
 
 static char * GameFileList[] = {	"cdrom:\\DATA\\SPRITES\\MOUSE.TIM;1"	};
-									
+
 static void * GameFileDest[] = {	(GsSprite*)&GameMouseSpr		};
 
 //static char GameLevelTitle[LEVEL_TITLE_SIZE];
@@ -61,14 +61,10 @@ static void * GameFileDest[] = {	(GsSprite*)&GameMouseSpr		};
 static uint8_t GameHour;
 static uint8_t GameMinutes;
 
-//Local flag for two-player game mode. Obtained from Menu
-static bool TwoPlayersActive;
-
-void Game(bool two_players)
-{	
-	TwoPlayersActive = two_players;
+void Game(void)
+{
 	GameInit();
-	
+
 	while(1)
 	{
 		if(GamePause() == true)
@@ -76,21 +72,21 @@ void Game(bool two_players)
 			// Exit game
 			break;
 		}
-		
+
 		GameEmergencyMode();
-		
+
 		GameCalculations();
-		
+
 		GameGraphics();
-		
+
 		if(GameStartupFlag == true)
 		{
 			GameStartupFlag = false;
 		}
 	}
-	
+
 	EndAnimation();
-	
+
 	SfxPlayTrack(INTRO_TRACK);
 }
 
@@ -99,12 +95,12 @@ bool GamePause(void)
 	TYPE_PLAYER * ptrPlayer;
 	uint8_t i;
 	bool pause_flag = false;
-	
+
 	if(GameStartupFlag == true)
 	{
 		return false;
 	}
-	
+
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
 	{
 		ptrPlayer = &PlayerData[i];
@@ -120,15 +116,15 @@ bool GamePause(void)
 			}
 		}
 	}
-	
+
 	if(pause_flag == true)
-	{	
+	{
 		// Blocking function:
 		// 	* Returns true if player pointed to by ptrPlayer wants to exit game
 		//	* Returns false if player pointed to by ptrPlayer wants to resume game
 		return GameGuiPauseDialog(ptrPlayer);
 	}
-	
+
 	return false;
 }
 
@@ -136,53 +132,38 @@ void GameInit(void)
 {
 	uint8_t i;
 	uint32_t track;
-	
+
 	GameStartupFlag = true;
-	
+
 	LoadMenu(	GameFileList,
 				GameFileDest,
 				sizeof(GameFileList) / sizeof(char*),
-				sizeof(GameFileDest) /sizeof(void*)	);	
-	
+				sizeof(GameFileDest) /sizeof(void*)	);
+
 	GameLoadLevel();
-	
+
 	GameGuiInit();
 
-	PlayerData[PLAYER_ONE].Active = true;
 	PlayerData[PLAYER_ONE].PadKeyPressed_Callback = &PadOneKeyPressed;
 	PlayerData[PLAYER_ONE].PadKeyReleased_Callback = &PadOneKeyReleased;
 	PlayerData[PLAYER_ONE].PadDirectionKeyPressed_Callback = &PadOneDirectionKeyPressed;
-	
-	PlayerData[PLAYER_TWO].Active = TwoPlayersActive? true : false;
-	
-	if(PlayerData[PLAYER_TWO].Active == true)
-	{
-		PlayerData[PLAYER_TWO].PadKeyPressed_Callback = &PadTwoKeyPressed;
-		PlayerData[PLAYER_TWO].PadKeyReleased_Callback = &PadTwoKeyReleased;
-		PlayerData[PLAYER_TWO].PadDirectionKeyPressed_Callback = &PadTwoDirectionKeyPressed;
-	}
-	
+
+	PlayerData[PLAYER_TWO].PadKeyPressed_Callback = &PadTwoKeyPressed;
+	PlayerData[PLAYER_TWO].PadKeyReleased_Callback = &PadTwoKeyReleased;
+	PlayerData[PLAYER_TWO].PadDirectionKeyPressed_Callback = &PadTwoDirectionKeyPressed;
+
 	for(i = 0; i < MAX_PLAYERS ; i++)
 	{
 		CameraInit(&PlayerData[i]);
 	}
-	
-	GameMouseSpr.x = MOUSE_X;
-	GameMouseSpr.y = MOUSE_Y;
-	GameMouseSpr.w = MOUSE_W;
-	GameMouseSpr.h = MOUSE_H;
-	GameMouseSpr.attribute = COLORMODE(COLORMODE_16BPP);
-	GameMouseSpr.r = NORMAL_LUMINANCE;
-	GameMouseSpr.g = NORMAL_LUMINANCE;
-	GameMouseSpr.b = NORMAL_LUMINANCE;
-	
+
 	GfxSetGlobalLuminance(0);
-	
+
 	track = SystemRand(GAMEPLAY_FIRST_TRACK,GAMEPLAY_LAST_TRACK);
-				
+
 	LoadMenuEnd();
-	
-	SfxPlayTrack(track);	
+
+	SfxPlayTrack(track);
 }
 
 void GameEmergencyMode(void)
@@ -191,35 +172,35 @@ void GameEmergencyMode(void)
 	{
 		ERROR_RECT_X = 32,
 		ERROR_RECT_W = X_SCREEN_RESOLUTION - (ERROR_RECT_X << 1),
-		
+
 		ERROR_RECT_Y = 16,
 		ERROR_RECT_H = Y_SCREEN_RESOLUTION - (ERROR_RECT_Y << 1),
-		
+
 		ERROR_RECT_R = 0,
 		ERROR_RECT_G = 32,
 		ERROR_RECT_B = NORMAL_LUMINANCE
 	};
-	
+
 	GsRectangle errorRct;
-	
+
 	bzero((GsRectangle*)&errorRct, sizeof(GsRectangle));
-	
+
 	while(SystemGetEmergencyMode() == true)
 	{
 		// Pad one has been disconnected during gameplay
 		// Show an error screen until it is disconnected again.
-		
+
 		GsSortCls(0,0,0);
-		
+
 		errorRct.x = ERROR_RECT_X;
 		errorRct.w = ERROR_RECT_W;
 		errorRct.y = ERROR_RECT_Y;
 		errorRct.h = ERROR_RECT_H;
-		
+
 		errorRct.r = ERROR_RECT_R;
 		errorRct.g = ERROR_RECT_G;
 		errorRct.b = ERROR_RECT_B;
-		
+
 		GsSortRectangle(&errorRct);
 		GfxDrawScene();
 	}
@@ -228,9 +209,9 @@ void GameEmergencyMode(void)
 void GameCalculations(void)
 {
 	uint8_t i;
-	
+
 	GameClock();
-	
+
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
 	{
 		// Run player-specific functions for each player
@@ -238,7 +219,7 @@ void GameCalculations(void)
 		{
 			GamePlayerHandler(&PlayerData[i]);
 		}
-	}	
+	}
 }
 
 void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)
@@ -251,13 +232,13 @@ void GameClock(void)
 	if(System1SecondTick() == true)
 	{
 		GameMinutes++;
-		
+
 		if(GameMinutes >= 60)
 		{
 			GameHour++;
 			GameMinutes = 0;
 		}
-		
+
 		if(GameHour >= 24)
 		{
 			GameHour = 0;
@@ -270,23 +251,23 @@ void GameGraphics(void)
 	while(	(GfxIsGPUBusy() == true)
 					||
 			(SystemRefreshNeeded() == false)	);
-			
+
 	GameRenderLevel();
-	
+
 	GameGuiClock(GameHour,GameMinutes);
-	
-	GfxDrawScene();	
+
+	GfxDrawScene();
 }
 
 void GameLoadLevel(void)
-{	
-	
+{
+
 }
 
 
 void GameRenderLevel(void)
 {
-	
+
 }
 
 void GameSetTime(uint8_t hour, uint8_t minutes)
