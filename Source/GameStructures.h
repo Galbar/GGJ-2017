@@ -28,6 +28,11 @@ typedef struct t_vector
 	fix16_t y;
 }TYPE_VECTOR;
 
+typedef struct t_wave
+{
+
+}TYPE_WAVE;
+
 typedef struct t_player
 {
 	bool dead;

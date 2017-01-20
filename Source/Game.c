@@ -41,6 +41,10 @@ static void GameClock(void);
  * *************************************/
 
 bool GameStartupFlag;
+// Instances for player-specific data
+TYPE_PLAYER PlayerData[MAX_PLAYERS];
+// Instances for wave-specific data
+TYPE_WAVE WaveData[MAX_WAVES];
 
 /* *************************************
  * 	Local Variables
@@ -48,8 +52,6 @@ bool GameStartupFlag;
 
 static GsSprite GameMouseSpr;
 
-// Instances for player-specific data
-TYPE_PLAYER PlayerData[MAX_PLAYERS];
 
 static char * GameFileList[] = {	"cdrom:\\DATA\\SPRITES\\MOUSE.TIM;1"	};
 
@@ -105,15 +107,12 @@ bool GamePause(void)
 	{
 		ptrPlayer = &PlayerData[i];
 		// Run player-specific functions for each player
-		if(ptrPlayer->Active == true)
+		//dprintf("Released callback = 0x%08X\n", ptrPlayer->PadKeyReleased_Callback);
+		if(ptrPlayer->PadKeyReleased_Callback(PAD_START) == true)
 		{
-			//dprintf("Released callback = 0x%08X\n", ptrPlayer->PadKeyReleased_Callback);
-			if(ptrPlayer->PadKeyReleased_Callback(PAD_START) == true)
-			{
-				dprintf("Player %d set pause_flag to true!\n",i);
-				pause_flag = true;
-				break;
-			}
+			dprintf("Player %d set pause_flag to true!\n",i);
+			pause_flag = true;
+			break;
 		}
 	}
 
@@ -130,7 +129,6 @@ bool GamePause(void)
 
 void GameInit(void)
 {
-	uint8_t i;
 	uint32_t track;
 
 	GameStartupFlag = true;
@@ -152,10 +150,7 @@ void GameInit(void)
 	PlayerData[PLAYER_TWO].PadKeyReleased_Callback = &PadTwoKeyReleased;
 	PlayerData[PLAYER_TWO].PadDirectionKeyPressed_Callback = &PadTwoDirectionKeyPressed;
 
-	for(i = 0; i < MAX_PLAYERS ; i++)
-	{
-		CameraInit(&PlayerData[i]);
-	}
+	CameraInit();
 
 	GfxSetGlobalLuminance(0);
 
@@ -215,10 +210,7 @@ void GameCalculations(void)
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
 	{
 		// Run player-specific functions for each player
-		if(PlayerData[i].Active == true)
-		{
-			GamePlayerHandler(&PlayerData[i]);
-		}
+		GamePlayerHandler(&PlayerData[i]);
 	}
 }
 
