@@ -59,11 +59,6 @@ void GfxDrawButton(short x, short y, unsigned short btn);
 // Sends current display data on a specific VRAM section and fills
 // sprite structure pointed to by "spr".
 void GfxSaveDisplayData(GsSprite *spr);
-TYPE_CARTESIAN_POS GfxIsometricToCartesian(TYPE_ISOMETRIC_POS * ptrIsoPos);
-// Function overload for fixed-point 16.16 data type.
-TYPE_CARTESIAN_POS GfxIsometricFix16ToCartesian(TYPE_ISOMETRIC_FIX16_POS * ptrIso16Pos);
-// Transforms cartesian position to isometric position. Z axis is assumed to be zero!
-TYPE_ISOMETRIC_POS GfxCartesianToIsometric(TYPE_CARTESIAN_POS * ptrCartPos);
 // Fills GsSprite structure pointed to by "spr" with texture page and U/V
 // offset data given a position in VRAM.
 bool GfxTPageOffsetFromVRAMPosition(GsSprite * spr, short x, short y);
