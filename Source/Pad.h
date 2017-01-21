@@ -27,6 +27,8 @@ bool PadOneConnected(void);
 bool PadOneAnyKeyPressed(void);
 bool PadTwoAnyKeyPressed(void);
 
+bool PadOneAnyKeyReleased(void);
+
 bool PadOneKeyPressed(unsigned short key);
 bool PadTwoKeyPressed(unsigned short key);
 
