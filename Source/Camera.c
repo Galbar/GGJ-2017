@@ -9,10 +9,11 @@
  * *************************************/
 
 #define SPEED_CALCULATION_TIME 3
-#define MAX_CAMERA_SPEED 5
+#define MAX_CAMERA_SPEED 4
 #define MIN_CAMERA_SPEED 1
 #define CAMERA_INITIAL_X_OFFSET (X_SCREEN_RESOLUTION >> 1)
-#define CAMERA_FAST_MOVEMENT_THRESHOLD 32
+#define CAMERA_FAST_MOVEMENT_THRESHOLD 16
+#define CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS MAX_CAMERA_SPEED
 
 /* *************************************
  * 	Local Prototypes
@@ -55,6 +56,9 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	short middle_point = abs(plOne_middle - plTwo_middle) >> 1;
 	
+	static bool hysteresis = false;
+	short ref_value;
+	
 	short camera_diff;
 	
 	if(	plOne_middle < plTwo_middle	)
@@ -71,16 +75,13 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		Camera.TargetPos = plTwo_middle + middle_point;
 	}
 	
-	camera_diff = Camera.TargetPos - (Camera.X_Offset + (X_SCREEN_RESOLUTION >> 1) );
-	
-	TargetRect.x = Camera.TargetPos;
-	TargetRect.y = 128;
+	camera_diff = Camera.TargetPos - ((-Camera.X_Offset) + (X_SCREEN_RESOLUTION >> 1) );
 	
 	dprintf("Target = {%d}\n", Camera.TargetPos);
 	
 	dprintf("Middle = {%d}\n", middle_point);
 	
-	if((Camera.X_Offset + camera_diff) < 0)
+	if(((-Camera.X_Offset) + camera_diff) < 0)
 	{
 		dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
 		// Do not go too much left!
@@ -100,8 +101,12 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	dprintf("CAMERA DIFF = %d\n",camera_diff);
 	
-	if(camera_diff < -CAMERA_FAST_MOVEMENT_THRESHOLD)
+	ref_value = hysteresis ? CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS: CAMERA_FAST_MOVEMENT_THRESHOLD;
+	
+	if(camera_diff < -ref_value)
 	{
+		hysteresis = true;
+		
 		if(Camera.X_Speed < 0)
 		{
 			Camera.X_Speed += 2;
@@ -111,19 +116,22 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 			Camera.X_Speed++;
 		}
 	}
-	else if(camera_diff > CAMERA_FAST_MOVEMENT_THRESHOLD)
+	else if(camera_diff > ref_value)
 	{
+		hysteresis = true;
+		
 		if(Camera.X_Speed > 0)
 		{
-			Camera.X_Speed -= 2;
+			Camera.X_Speed --;
 		}
 		else if(Camera.X_Speed > -MAX_CAMERA_SPEED)
 		{
 			Camera.X_Speed--;
 		}
 	}
-	else if(abs(camera_diff) <= CAMERA_FAST_MOVEMENT_THRESHOLD)
+	else if(abs(camera_diff) <= ref_value)
 	{
+		hysteresis = false;
 		// Slow movement
 		if(Camera.X_Speed > 0)
 		{
@@ -132,6 +140,18 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		else if(Camera.X_Speed < 0)
 		{
 			Camera.X_Speed++;
+		}
+		else
+		{
+			// Camera has no speed
+			if(camera_diff > 0)
+			{
+				Camera.X_Offset--;
+			}
+			else if(camera_diff < 0)
+			{
+				Camera.X_Offset++;
+			}
 		}
 	}
 }
@@ -143,6 +163,9 @@ void CameraHandler(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		Camera.X_Speed = 0;
 		return;
 	}
+	
+	TargetRect.x = Camera.TargetPos;
+	TargetRect.y = 128;
 	
 	if(Camera.Speed_Timer < SPEED_CALCULATION_TIME)
 	{
