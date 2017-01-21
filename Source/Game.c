@@ -262,6 +262,7 @@ void GameCalculations(void)
 	GameClock();
 	
 	GamePhysicsCheckCollisions();
+	//GamePhysicsResolveCollisions(); // CHECK HERE!
 
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
 	{
