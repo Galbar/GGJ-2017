@@ -13,7 +13,7 @@
 #define MIN_CAMERA_SPEED 1
 #define CAMERA_INITIAL_X_OFFSET (X_SCREEN_RESOLUTION >> 1)
 #define CAMERA_FAST_MOVEMENT_THRESHOLD 16
-#define CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS MAX_CAMERA_SPEED
+#define CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS 8
 
 /* *************************************
  * 	Local Prototypes
@@ -121,7 +121,7 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		
 		if(Camera.X_Speed < 0)
 		{
-			Camera.X_Speed += 2;
+			Camera.X_Speed++;
 		}
 		else if(Camera.X_Speed < MAX_CAMERA_SPEED)
 		{

@@ -12,6 +12,7 @@
 #define BALL_ONE_INIT_POS (fix16_from_int(0))
 #define BALL_TWO_INIT_POS (fix16_from_int(256))
 #define BALL_RADIUS (fix16_from_int(16))
+#define WIND_SLOTS 4
 
 /* **************************************
  * 	Structs and enums					*
@@ -152,6 +153,7 @@ void GameInit(void)
 	PlayerData[PLAYER_ONE].ptrSprite = &PlayerOneBall;
 	PlayerData[PLAYER_ONE].radius = BALL_RADIUS;
 	PlayerData[PLAYER_ONE].StateOnWater = true;
+	PlayerData[PLAYER_ONE].wind_slots = WIND_SLOTS;
 
 	PlayerData[PLAYER_TWO].position.x = BALL_TWO_INIT_POS;
 	PlayerData[PLAYER_TWO].position.y = fix16_from_int(128); //TEST, remove ASAP
@@ -161,6 +163,7 @@ void GameInit(void)
 	PlayerData[PLAYER_TWO].ptrSprite = &PlayerTwoBall;
 	PlayerData[PLAYER_TWO].radius = BALL_RADIUS;
 	PlayerData[PLAYER_TWO].StateOnWater = true;
+	PlayerData[PLAYER_TWO].wind_slots = WIND_SLOTS;
 
 	CameraInit();
 
