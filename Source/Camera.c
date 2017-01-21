@@ -49,6 +49,16 @@ void CameraApplyCoordinatesToRectangle(GsRectangle * rect)
 	rect->x += (short)Camera.X_Offset;
 }
 
+void CameraApplyCoordinatesToGsGPoly4(GsGPoly4 * poly4)
+{
+	uint8_t i;
+	
+	for(i = 0; i < 4; i++)
+	{
+		poly4->x[i] += (short)Camera.X_Offset;
+	}
+}
+
 void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 {
 	short plOne_middle = fix16_to_int(ptrPlayer1->position.x);

@@ -158,6 +158,19 @@ void GfxDrawScene_Slow(void)
 	while(GfxIsGPUBusy() == true);
 }
 
+void GfxSortGsGPoly4(GsGPoly4 * poly)
+{
+	short w = abs(poly->x[1] - poly->x[0]);
+	short h = abs(poly->y[0] - poly->x[2]);
+	
+	if(GfxIsInsideScreenArea(poly->x[0], poly->y[0], w, h) == false)
+	{
+		return;
+	}
+	
+	GsSortGPoly4(poly);
+}
+
 void GfxSortSprite(GsSprite * spr)
 {
 	uint8_t aux_r = spr->r;

@@ -37,7 +37,7 @@ enum
 
 enum
 {
-	CLOCK_X = 16,
+	CLOCK_X = (X_SCREEN_RESOLUTION >> 1) - 48,
 	CLOCK_Y = 16
 };
 
@@ -127,7 +127,6 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		
 		if(show_pause_dialog == true)
 		{
-			dprintf("%d\n",show_pause_dialog);
 			GsSortGPoly4(&PauseRect);
 		}
 		

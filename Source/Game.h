@@ -11,6 +11,7 @@
 #include "System.h"
 #include "Camera.h"
 #include "GameGui.h"
+#include "GamePhysics.h"
 
 /* *************************************
  * 	Defines
