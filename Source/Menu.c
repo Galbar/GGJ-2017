@@ -344,7 +344,8 @@ void MainMenuButtonHandler(void)
 
 void CreditsDraw()
 {
-	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5, Y_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 2,"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -\n -Aria Serra");
+	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5, Y_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 2,
+		"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -Alessio Linares\n -Aria Serra");
 
 	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 7, Y_SCREEN_RESOLUTION -FONT_DEFAULT_CHAR_SIZE * 2, "Press any button to return");
 }
