@@ -87,14 +87,15 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	camera_diff = Camera.TargetPos - ((-Camera.X_Offset) + (X_SCREEN_RESOLUTION >> 1) );
 	
-	dprintf("Target = {%d}\n", Camera.TargetPos);
+	/*dprintf("Target = {%d}\n", Camera.TargetPos);
 	
-	dprintf("Middle = {%d}\n", middle_point);
+	dprintf("Middle = {%d}\n", middle_point);*/
 	
 	if(((-Camera.X_Offset) + camera_diff) < 0)
 	{
-		dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
+		//dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
 		// Do not go too much left!
+		Camera.X_Speed = 0;
 		return;
 	}
 	
@@ -102,7 +103,8 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	if((Camera.X_Offset + camera_diff) >= (LEVEL_X_SIZE - (X_SCREEN_RESOLUTION >> 1) ) )
 	{
-		dprintf("Right edge exceeded!\n");
+		//dprintf("Right edge exceeded!\n");
+		Camera.X_Speed = 0;
 		return;
 	}
 	

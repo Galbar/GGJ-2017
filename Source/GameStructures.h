@@ -29,8 +29,11 @@ typedef struct t_vector
 
 typedef struct t_wave
 {
+	bool decrease;
     TYPE_VECTOR speed;
     TYPE_VECTOR position;
+    short max_value;
+    short min_value;
 }TYPE_WAVE;
 
 typedef struct t_player
@@ -38,6 +41,7 @@ typedef struct t_player
 	// States
 	bool dead;
 	bool StateOnWater;
+	bool StateTackle;
 	
 	uint8_t wind_slots;
 	uint16_t hits;

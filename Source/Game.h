@@ -20,13 +20,14 @@
 #define PLAYER_ONE 0
 #define PLAYER_TWO 1
 #define MAX_PLAYERS (PLAYER_TWO + 1)
-#define MAX_WAVES 16
+#define MAX_WAVES 13
+#define MAX_SECONDROW_WAVES (MAX_WAVES * 2)
 
 #define TILE_SIZE 64
 #define LEVEL_TITLE_SIZE 32
 #define TILE_SIZE_BIT_SHIFT 6
 
-#define LEVEL_X_SIZE 640
+#define LEVEL_X_SIZE 832
 #define LEVEL_Y_SIZE 240
 
 /* *************************************

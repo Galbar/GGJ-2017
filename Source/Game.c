@@ -11,7 +11,7 @@
 #define TILE_MIRROR_FLAG ( (uint8_t)0x80 )
 #define BALL_ONE_INIT_POS (fix16_from_int(0))
 #define BALL_TWO_INIT_POS (fix16_from_int(256))
-#define BALL_RADIUS (fix16_from_int(32))
+#define BALL_RADIUS (fix16_from_int(16))
 
 /* **************************************
  * 	Structs and enums					*
@@ -41,6 +41,7 @@ bool GameStartupFlag;
 TYPE_PLAYER PlayerData[MAX_PLAYERS];
 // Instances for wave-specific data
 TYPE_WAVE WaveData[MAX_WAVES];
+TYPE_WAVE WaveSecondRowData[MAX_SECONDROW_WAVES];
 
 /* *************************************
  * 	Local Variables
@@ -48,14 +49,15 @@ TYPE_WAVE WaveData[MAX_WAVES];
 
 static GsSprite PlayerOneBall;
 static GsSprite PlayerTwoBall;
+static GsSprite ParallaxSpr;
 
-static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1",
-								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	};
+static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\PARALLAX.TIM;1"	};
 
 static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall,
-								(GsSprite*)&PlayerTwoBall	};
-
-//static char GameLevelTitle[LEVEL_TITLE_SIZE];
+								(GsSprite*)&PlayerTwoBall,
+								(GsSprite*)&ParallaxSpr	 };
 
 //Game local time
 static uint8_t GameMinutes;
@@ -149,6 +151,7 @@ void GameInit(void)
 	PlayerData[PLAYER_ONE].PadDirectionKeyPressed_Callback = &PadOneDirectionKeyPressed;
 	PlayerData[PLAYER_ONE].ptrSprite = &PlayerOneBall;
 	PlayerData[PLAYER_ONE].radius = BALL_RADIUS;
+	PlayerData[PLAYER_ONE].StateOnWater = true;
 
 	PlayerData[PLAYER_TWO].position.x = BALL_TWO_INIT_POS;
 	PlayerData[PLAYER_TWO].position.y = fix16_from_int(128); //TEST, remove ASAP
@@ -157,6 +160,7 @@ void GameInit(void)
 	PlayerData[PLAYER_TWO].PadDirectionKeyPressed_Callback = &PadTwoDirectionKeyPressed;
 	PlayerData[PLAYER_TWO].ptrSprite = &PlayerTwoBall;
 	PlayerData[PLAYER_TWO].radius = BALL_RADIUS;
+	PlayerData[PLAYER_TWO].StateOnWater = true;
 
 	CameraInit();
 
@@ -169,12 +173,39 @@ void GameInit(void)
 	for(i = 0; i < MAX_WAVES; i++)
 	{
 		WaveData[i].position.x = fix16_from_int(i << 6); // i * 64
-		WaveData[i].position.y = fix16_from_int(SystemRand(Y_SCREEN_RESOLUTION - 64, Y_SCREEN_RESOLUTION - 16));
 		
-		dprintf("[%d] = {%d, %d}\n",
+		WaveData[i].min_value = 240 - 32;
+		WaveData[i].max_value = Y_SCREEN_RESOLUTION - 16;
+		
+		WaveData[i].position.y = fix16_from_int(SystemRand(240 - 32 , Y_SCREEN_RESOLUTION - 16) );
+		
+		dprintf("[%d] = {%d, %d}, max = {%d, %d}\n",
 				i,
 				fix16_to_int(WaveData[i].position.x),
-				fix16_to_int(WaveData[i].position.y)	);
+				fix16_to_int(WaveData[i].position.y),
+				fix16_to_int(WaveData[i].min_value),
+				fix16_to_int(WaveData[i].max_value)	);
+				
+		WaveData[i].decrease = SystemRand(false, true);
+	}
+	
+	for(i = 0; i < MAX_SECONDROW_WAVES; i++)
+	{
+		WaveSecondRowData[i].position.x = fix16_from_int(i << 5); // i * 32
+		
+		WaveSecondRowData[i].min_value = 240 - 48;
+		WaveSecondRowData[i].max_value = Y_SCREEN_RESOLUTION - 32;
+		
+		WaveSecondRowData[i].position.y = fix16_from_int(SystemRand(240 - 48 , Y_SCREEN_RESOLUTION - 32));
+		
+		dprintf("[%d] = {%d, %d}, max = {%d, %d}\n",
+				i,
+				fix16_to_int(WaveSecondRowData[i].position.x),
+				fix16_to_int(WaveSecondRowData[i].position.y),
+				fix16_to_int(WaveSecondRowData[i].min_value),
+				fix16_to_int(WaveSecondRowData[i].max_value)	);
+				
+		WaveSecondRowData[i].decrease = SystemRand(false, true);
 	}
 
 	LoadMenuEnd();
@@ -234,11 +265,17 @@ void GameCalculations(void)
 	{
 		// Run player-specific functions for each player
 		GamePlayerHandler(&PlayerData[i]);
+		GamePhysicsBallHandler(&PlayerData[i]);
 	}
 	
 	for(i = 0; i < MAX_WAVES; i++)
 	{
 		GamePhysicsWaveHandler(&WaveData[i]);
+	}
+	
+	for(i = 0; i < MAX_SECONDROW_WAVES; i++)
+	{
+		GamePhysicsWaveHandler(&WaveSecondRowData[i]);
 	}
 
 	CameraHandler(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
@@ -246,14 +283,7 @@ void GameCalculations(void)
 
 void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)
 {
-	if(ptrPlayer->PadKeyPressed_Callback(PAD_LEFT) == true)
-	{
-		ptrPlayer->position.x -= fix16_one;
-	}
-	else if(ptrPlayer->PadKeyPressed_Callback(PAD_RIGHT) == true)
-	{
-		ptrPlayer->position.x += fix16_one;
-	}
+
 }
 
 void GameClock(void)
@@ -284,12 +314,23 @@ void GameGraphics(void)
 	while(	(GfxIsGPUBusy() == true)
 					||
 			(SystemRefreshNeeded() == false)	);
+			
+	ParallaxSpr.x = 0;
+	ParallaxSpr.y = 0;
+	ParallaxSpr.r = NORMAL_LUMINANCE;
+	ParallaxSpr.g = NORMAL_LUMINANCE;
+	ParallaxSpr.b = NORMAL_LUMINANCE;
+	
+	GsSortCls(0,0,0);
+
+	GfxSortSprite(&ParallaxSpr);
 
 	GameRenderWaves();
 	
 	for(i = 0; i < MAX_PLAYERS; i++)
 	{
 		GameRenderBall(&PlayerData[i]);
+		GameGuiBeachSign(&PlayerData[i], i);
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);
@@ -313,8 +354,40 @@ void GameRenderWaves(void)
 	
 	bzero((GsGPoly4*)&WaveGPoly4, sizeof(GsGPoly4)); // Reset data
 	
-	// TODO!!
-	GsSortCls(0,0,0);
+	for(i = 0; i < MAX_SECONDROW_WAVES -1 ; i++)
+	{
+		WaveGPoly4.x[0] = (short)fix16_to_int(WaveSecondRowData[i].position.x);
+		WaveGPoly4.x[1] = (short)fix16_to_int(WaveSecondRowData[i + 1].position.x);
+		
+		WaveGPoly4.x[2] = WaveGPoly4.x[0];
+		WaveGPoly4.x[3] = (short)fix16_to_int(WaveSecondRowData[i + 1].position.x);
+		
+		WaveGPoly4.y[0] = (short)fix16_to_int(WaveSecondRowData[i].position.y);
+		WaveGPoly4.y[1] = (short)fix16_to_int(WaveSecondRowData[i + 1].position.y);
+		
+		WaveGPoly4.y[2] = Y_SCREEN_RESOLUTION;
+		WaveGPoly4.y[3] = Y_SCREEN_RESOLUTION;
+		
+		for(j = 0; j < 2; j++)
+		{
+			WaveGPoly4.r[j] = NORMAL_LUMINANCE >> 1;
+			WaveGPoly4.g[j] = NORMAL_LUMINANCE >> 1;
+		}
+		
+		for(j = 2; j < 4; j++)
+		{
+			WaveGPoly4.r[j] = NORMAL_LUMINANCE >> 2;
+			WaveGPoly4.g[j] = NORMAL_LUMINANCE >> 2;
+		}
+		
+		for(j = 0; j < 4; j++)
+		{
+			WaveGPoly4.b[j] = NORMAL_LUMINANCE >> 1;
+		}
+		
+		CameraApplyCoordinatesToGsGPoly4(&WaveGPoly4);
+		GfxSortGsGPoly4(&WaveGPoly4);
+	}
 	
 	for(i = 0; i < MAX_WAVES -1 ; i++)
 	{

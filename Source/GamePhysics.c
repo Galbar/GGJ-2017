@@ -10,22 +10,28 @@
 
 #define BOUNCE_COEF_BALLS 0xCCCC // 0.8
 #define BOUNCE_COEF_WAVES 0x4CCC // 0.3
-#define GAMEPHYSICS_GRAVITY_ACCELERATION 0x20000 // 2.00
-#define GAMEPHYSICS_LAUNCH_SPEED 0x80000 // 8.00
+#define GAMEPHYSICS_GRAVITY_ACCELERATION 0x2000
+#define GAMEPHYSICS_WIND_DECELERATION 0xA00
+#define GAMEPHYSICS_TACKLE_SPEED (0x7C000)
+#define GAMEPHYSICS_NORMAL_SPEED (0x4000)
+#define GAMEPHYSICS_MAX_NORMAL_SPEED (0x8000) // 8.00
+#define GAMEPHYSICS_LAUNCH_SPEED (-0x60000) // 8.00
 
 #define GAMEPHYSICS_INITIAL_WAVE_SPEED 0x20000
 
 /* **************************************
  * 	Local variables						*
  * **************************************/
+ 
+/* **************************************
+ * 	Local prototypes					*
+ * **************************************/
+ 
+static void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer);
+static void GamePhysicsTackleHandler(TYPE_PLAYER * ptrPlayer);
 
 static TYPE_COLLISION collisions[MAX_POSSIBLE_COLLISIONS];
 static uint8_t num_collisions;
-
-void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer)
-{
-	ptrPlayer->speed.y += GAMEPHYSICS_GRAVITY_ACCELERATION;
-}
 
 void GamePhysicsInit(void)
 {
@@ -84,7 +90,7 @@ TYPE_COLLISION GamePhysicsMakeCollision(	bool Obj1Dynamic,
     return collision;
 }
 
-void GamePhysicsLaunchBall(TYPE_PLAYER * ptrPlayer)
+void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer)
 {
 	if(ptrPlayer->PadKeyReleased_Callback(PAD_CROSS) == true)
 	{
@@ -93,6 +99,68 @@ void GamePhysicsLaunchBall(TYPE_PLAYER * ptrPlayer)
 			ptrPlayer->StateOnWater = false;
 			ptrPlayer->speed.y = GAMEPHYSICS_LAUNCH_SPEED; // Jump!!
 		}
+	}
+	else if(	(ptrPlayer->PadKeyReleased_Callback(PAD_CIRCLE) == true)
+										&&
+				(ptrPlayer->StateTackle == false)	)
+	{
+		if(ptrPlayer->PadKeyPressed_Callback(PAD_LEFT) == true)
+		{
+			ptrPlayer->StateTackle = true;
+			ptrPlayer->speed.x = -GAMEPHYSICS_TACKLE_SPEED;
+		}
+		else if(ptrPlayer->PadKeyPressed_Callback(PAD_RIGHT) == true)
+		{
+			ptrPlayer->StateTackle = true;
+			ptrPlayer->speed.x = GAMEPHYSICS_TACKLE_SPEED;
+		}
+		
+	}
+	
+	if(	(ptrPlayer->StateTackle == false)
+						&&
+		(ptrPlayer->StateOnWater == false) )
+	{
+		if(ptrPlayer->PadKeyPressed_Callback(PAD_LEFT) == true)
+		{
+			if(ptrPlayer->speed.x > -GAMEPHYSICS_MAX_NORMAL_SPEED)
+			{
+				ptrPlayer->speed.x -= GAMEPHYSICS_NORMAL_SPEED;
+			}
+		}
+		else if(ptrPlayer->PadKeyPressed_Callback(PAD_RIGHT) == true)
+		{
+			if(ptrPlayer->speed.x < GAMEPHYSICS_MAX_NORMAL_SPEED)
+			{
+				ptrPlayer->speed.x += GAMEPHYSICS_NORMAL_SPEED;
+			}
+		}
+	}
+	
+	GamePhysicsApplyGravity(ptrPlayer);
+	GamePhysicsTackleHandler(ptrPlayer);
+}
+
+void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer)
+{
+	ptrPlayer->speed.y +=GAMEPHYSICS_GRAVITY_ACCELERATION;
+	
+	if(	(ptrPlayer->position.y + ptrPlayer->speed.y) < (fix16_from_int(240) - ptrPlayer->radius) )
+	{
+		ptrPlayer->position.y += ptrPlayer->speed.y;
+	}
+	else
+	{
+		ptrPlayer->position.y = (fix16_from_int(240) - ptrPlayer->radius);
+		ptrPlayer->speed.x = 0;
+		
+		if(ptrPlayer->StateTackle == true)
+		{
+			dprintf("Was true, set to false!\n");
+		}
+		
+		ptrPlayer->StateTackle = false;
+		ptrPlayer->StateOnWater = true;
 	}
 }
 
@@ -139,38 +207,53 @@ void GamePhysicsCheckCollisions(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlaye
 
 void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave)
 {
-	uint8_t sign = SystemRand(0, 100);
 	fix16_t next_speed;
+	fix16_t max_random_point;
 	
-	if(sign > 50)
+	bool sign = SystemRand(false, true);
+	
+	if(sign == true)
 	{
-		next_speed = SystemRand(0, 0x20000);
+		max_random_point = -fix16_from_int(SystemRand(0, 8));
 	}
 	else
 	{
-		next_speed = -SystemRand(0, 0x20000);
+		max_random_point = fix16_from_int(SystemRand(0, 8));
+	}
+	
+	if(ptrWave->decrease == true)
+	{
+		next_speed = SystemRand(0, 0x800);
+	}
+	else
+	{
+		next_speed = -SystemRand(0, 0x800);
 	}
 	
 	ptrWave->speed.y += next_speed;
 	
-	if(ptrWave->speed.y > 131072)
+	if(ptrWave->speed.y >= 0x20000)
 	{
-		ptrWave->speed.y -= 0x20000;
+		ptrWave->decrease = false;
+		ptrWave->speed.y -= 0x800;
 	}
-	else if(ptrWave->speed.y < -131072)
+	else if(ptrWave->speed.y <= -0x20000)
 	{
-		ptrWave->speed.y += 0x20000;
+		ptrWave->decrease = true;
+		ptrWave->speed.y += 0x800;
 	}
 	
-	dprintf("next_speed = %d\n", fix16_to_int(next_speed));
-	
-	if((ptrWave->position.y + ptrWave->speed.y) < fix16_from_int(240-64) )
+	if((ptrWave->position.y + ptrWave->speed.y) < fix16_from_int(ptrWave->min_value + max_random_point) )
 	{
+		ptrWave->decrease = true;
+		ptrWave->speed.y = 0;
 		return;
 	}
 	
-	if((ptrWave->position.y + ptrWave->speed.y) > fix16_from_int(240-16) )
+	if((ptrWave->position.y + ptrWave->speed.y) > fix16_from_int(ptrWave->max_value) )
 	{
+		ptrWave->speed.y = 0;
+		ptrWave->decrease = false;
 		return;
 	}
 	
@@ -181,4 +264,50 @@ void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave)
 void GamePhysicsPerformCollisions(void)
 {
 	
+}
+
+void GamePhysicsTackleHandler(TYPE_PLAYER * ptrPlayer)
+{
+	if(ptrPlayer->speed.x < 0)
+	{
+		if( (ptrPlayer->speed.x + GAMEPHYSICS_WIND_DECELERATION) < 0)
+		{
+			ptrPlayer->speed.x += GAMEPHYSICS_WIND_DECELERATION;
+		}
+		else
+		{
+			ptrPlayer->speed.x = 0;
+		}
+	}
+	else if(ptrPlayer->speed.x > 0) // Ignore "== 0" case!!
+	{		
+		if( (ptrPlayer->speed.x - GAMEPHYSICS_WIND_DECELERATION) > 0)
+		{
+			ptrPlayer->speed.x -= GAMEPHYSICS_WIND_DECELERATION;
+
+		}
+		else
+		{
+			ptrPlayer->speed.x = 0;
+		}
+	}
+	
+	if(	(ptrPlayer->position.x + ptrPlayer->speed.x) < 0
+									||
+			(ptrPlayer->position.x + ptrPlayer->speed.x) > fix16_from_int(LEVEL_X_SIZE) )
+	{
+		// Verify out of map
+		dprintf("Player dead!\n");
+		
+		if(ptrPlayer->StateTackle == true)
+		{
+			dprintf("Was true, now false!\n");
+		}
+		
+		ptrPlayer->StateTackle = false;
+		ptrPlayer->speed.x = 0;
+		return;
+	}
+	
+	ptrPlayer->position.x += ptrPlayer->speed.x;
 }

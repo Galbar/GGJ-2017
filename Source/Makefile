@@ -34,8 +34,9 @@ rebuild: remove build
 build: clean objects $(PROJECT).elf $(PROJECT).exe
 	
 objects: 	$(addprefix $(OBJ_DIR)/,main.o System.o Menu.o Gfx.o Pad.o MainMenuBtnAni.o 	\
-									LoadMenu.o GameGui.o Sfx.o Camera.o EndAnimation.o			\
-									PSXSDKIntro.o Game.o GamePhysics.o Font.o MemCard.o)
+									LoadMenu.o GameGui.o Sfx.o Camera.o EndAnimation.o		\
+									PSXSDKIntro.o Game.o GamePhysics.o Font.o MemCard.o		\
+									BeachSignAni.o)
 			
 #music_objects:	$(addprefix ../Music/, TRACK01.bin TRACK02.bin TRACK03.bin)
 			
@@ -85,7 +86,10 @@ tiles:
 	bmp2tim ../Sprites/GPL_4bit.bmp		../cdimg/DATA/SPRITES/GPL.TIM 4 -org=384,174 -mpink -clut=384,502
 	bmp2tim ../Sprites/OpSrc_8bit.bmp	../cdimg/DATA/SPRITES/OPENSRC.TIM 8 -org=464,0 -mpink -clut=384,503
 	bmp2tim ../Sprites/Ball_01.bmp		../cdimg/DATA/SPRITES/BALL_01.TIM 16 -org=496,0 -mpink
-	bmp2tim ../Sprites/Ball_02.bmp		../cdimg/DATA/SPRITES/BALL_02.TIM 16 -org=560,0 -mpink
+	bmp2tim ../Sprites/Ball_02.bmp		../cdimg/DATA/SPRITES/BALL_02.TIM 16 -org=496,32 -mpink
+	bmp2tim ../Sprites/Parallax.bmp		../cdimg/DATA/SPRITES/PARALLAX.TIM 16 -org=640,0
+	bmp2tim ../Sprites/LeftArr.bmp		../cdimg/DATA/SPRITES/LEFTARR.TIM 16 -org=528,16 -mpink
+	bmp2tim ../Sprites/RightArr.bmp		../cdimg/DATA/SPRITES/RIGHTARR.TIM 16 -org=576,16 -mpink
 	
 sounds:
 	rm -f ../cdimg/DATA/SOUNDS/*.VAG

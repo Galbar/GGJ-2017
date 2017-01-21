@@ -30,5 +30,6 @@ TYPE_COLLISION GamePhysicsMakeCollision(	bool Obj1Dynamic,
 											fix16_t bounceCoeficient	);
 											
 void GamePhysicsCheckCollisions(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2);
-void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer);
 void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave);
+void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer);
+

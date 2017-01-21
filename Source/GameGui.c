@@ -60,11 +60,18 @@ static GsSprite ArrowsSpr;
 static GsGPoly4 PauseRect;
 static GsSprite SecondDisplay;
 
+static GsSprite LeftArrowSpr;
+static GsSprite RightArrowSpr;
+
 static char * GameFileList[] = {"cdrom:\\DATA\\FONTS\\FONT_1.FNT;1"		,
-								"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\LEFTARR.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\RIGHTARR.TIM;1"	};
 								
-static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont	,
-								(GsSprite*)&ArrowsSpr	};
+static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont		,
+								(GsSprite*)&ArrowsSpr		,
+								(GsSprite*)&LeftArrowSpr	,
+								(GsSprite*)&RightArrowSpr	};
 
 void GameGuiInit(void)
 {
@@ -150,4 +157,57 @@ void GameGuiClock(uint8_t hour, uint8_t min)
 	RadioFont.flags = FONT_NOFLAGS;
 	RadioFont.max_ch_wrap = 0;
 	FontPrintText(&RadioFont,CLOCK_X,CLOCK_Y,strClock);
+}
+
+void GameGuiBeachSign(TYPE_PLAYER * ptrPlayer, uint8_t i)
+{
+	static bool reminder[MAX_PLAYERS] = {false, false};
+	static int movement_angle = 0x168000;
+	static uint8_t movement_index[MAX_PLAYERS];
+		
+	if(GfxIsSpriteInsideScreenArea(ptrPlayer->ptrSprite) == false)
+	{
+		if(reminder[i] == false)
+		{
+			reminder[i] = true;
+			movement_index[i] = 0;
+		}
+		
+		movement_angle = 0x168000 + BeachSignAni[movement_index[i]];
+		
+		if( (movement_index[i] + 1) < BEACH_SIGN_ANI_SIZE)
+		{
+			movement_index[i]++;
+		}
+		
+		RightArrowSpr.mx = 22;
+		RightArrowSpr.my = 2;
+		
+		LeftArrowSpr.mx = 25;
+		LeftArrowSpr.my = 4;
+		
+		LeftArrowSpr.x = 16;
+		LeftArrowSpr.y = fix16_to_int(ptrPlayer->position.y) - 34;
+		LeftArrowSpr.rotate = movement_angle;
+		
+		RightArrowSpr.x = X_SCREEN_RESOLUTION - RightArrowSpr.w - 16;
+		RightArrowSpr.y = fix16_to_int(ptrPlayer->position.y) - 34;
+		RightArrowSpr.rotate = movement_angle;
+		
+		if(ptrPlayer->ptrSprite->x < 0)
+		{
+			GfxSortSprite(&LeftArrowSpr);
+		}
+		else if(ptrPlayer->ptrSprite->x > X_SCREEN_RESOLUTION)
+		{
+			GfxSortSprite(&RightArrowSpr);
+		}
+		
+	}
+	else
+	{
+		reminder[i] = false;
+		movement_index[i] = 0;
+	}
+	
 }

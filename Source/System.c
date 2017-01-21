@@ -8,7 +8,7 @@
  * 	Defines
  * *************************************/
 
-#define FILE_BUFFER_SIZE 0x20014
+#define FILE_BUFFER_SIZE 0x22214
 #define SYSTEM_MAX_TIMERS 16
 
 #define END_STACK_PATTERN (uint32_t) 0x18022015
