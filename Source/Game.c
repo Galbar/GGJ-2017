@@ -162,11 +162,11 @@ void GameInit(void)
 	GfxSetGlobalLuminance(0);
 
 	track = SystemRand(GAMEPLAY_FIRST_TRACK,GAMEPLAY_LAST_TRACK);
-	
+
 	timeout_flag = false;
 
 	LoadMenuEnd();
-	
+
 	GameSetTime(2,30 /* TODO: Set time by macros?? */);
 
 	SfxPlayTrack(track);
@@ -246,7 +246,7 @@ void GameClock(void)
 		if((--GameSeconds) == 0)
 		{
 			GameSeconds = 60;
-			
+
 			if(GameMinutes > 0)
 			{
 				GameMinutes--;
@@ -263,20 +263,20 @@ void GameClock(void)
 void GameGraphics(void)
 {
 	uint8_t i;
-	
+
 	while(	(GfxIsGPUBusy() == true)
 					||
 			(SystemRefreshNeeded() == false)	);
 
 	GameRenderLevel();
-	
+
 	for(i = 0; i < MAX_PLAYERS; i++)
 	{
 		GameRenderBall(&PlayerData[i]);
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);
-	
+
 	CameraDrawTarget();
 
 	GfxDrawScene();
@@ -304,11 +304,11 @@ void GameRenderBall(TYPE_PLAYER * ptrPlayer)
 {
 	short final_x = (short)fix16_to_int(ptrPlayer->position.x - (ptrPlayer->radius));
 	short final_y = (short)fix16_to_int(ptrPlayer->position.y - (ptrPlayer->radius));
-	
+
 	ptrPlayer->ptrSprite->x = final_x;
 	ptrPlayer->ptrSprite->y = final_y;
-	
+
 	CameraApplyCoordinatesToSprite(ptrPlayer->ptrSprite);
-	
+
 	GfxSortSprite(ptrPlayer->ptrSprite);
 }

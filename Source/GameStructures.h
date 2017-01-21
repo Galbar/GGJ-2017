@@ -38,7 +38,7 @@ typedef struct t_player
 	// States
 	bool dead;
 	bool StateOnWater;
-	
+
 	uint8_t wind_slots;
 	uint16_t hits;
 	fix16_t radius;
@@ -56,10 +56,10 @@ typedef struct t_collision
 {
     bool Obj1Dynamic;
     bool Obj2Dynamic;
-    TYPE_VECTOR * ptrObj1Position;
-    TYPE_VECTOR * ptrObj2Position;
-    TYPE_VECTOR * ptrObj1Speed;
-    TYPE_VECTOR * ptrObj2Speed;
+    TYPE_VECTOR ptrObj1Position;
+    TYPE_VECTOR ptrObj2Position;
+    TYPE_VECTOR ptrObj1Speed;
+    TYPE_VECTOR ptrObj2Speed;
     fix16_t intersectionDistance;
     fix16_t bounceCoeficient;
 }TYPE_COLLISION;
