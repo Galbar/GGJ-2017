@@ -212,6 +212,8 @@ void GameCalculations(void)
 		// Run player-specific functions for each player
 		GamePlayerHandler(&PlayerData[i]);
 	}
+
+	CameraHandler(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
 }
 
 void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)

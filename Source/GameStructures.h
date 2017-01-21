@@ -7,6 +7,7 @@
 
 #define GAME_MAX_CHARACTERS 8
 #define CHEAT_ARRAY_SIZE 16
+#define WAVE_RADIUS 32
 
 /* *************************************
  * 	Structs and enums
@@ -30,7 +31,9 @@ typedef struct t_vector
 
 typedef struct t_wave
 {
-
+    fix16_t y_speed;
+    TYPE_VECTOR position;
+    TYPE_VECTOR scale;
 }TYPE_WAVE;
 
 typedef struct t_player

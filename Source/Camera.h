@@ -19,7 +19,7 @@
  * *************************************/
 
 void CameraInit(void);
-void CameraHandler(void);
+void CameraHandler(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2);
 void CameraApplyCoordinatesToSprite(GsSprite * spr);
 void CameraApplyCoordinatesToRectangle(GsRectangle * rect);
 
