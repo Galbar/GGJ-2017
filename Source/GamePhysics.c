@@ -39,6 +39,17 @@ static TYPE_POINT_INFO point_infos[MAX_POSSIBLE_COLLISIONS - 1]; // -1 because c
 static uint8_t num_collisions;
 static uint8_t num_point_infos;
 
+fix16_t GamePhysicsRoundToInt(fix16_t value)
+{
+	return (value + 0x8000) & 0xFFFF0000;
+}
+
+void GamePhysicsVectorRoundToInt(TYPE_VECTOR * vector)
+{
+	vector->x = GamePhysicsRoundToInt(vector->x);
+	vector->y = GamePhysicsRoundToInt(vector->y);
+}
+
 void GamePhysicsInit(void)
 
 {

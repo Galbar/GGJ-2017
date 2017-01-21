@@ -14,6 +14,8 @@
 /* **************************************
  * 	Global prototypes					*
  * **************************************/
+fix16_t GamePhysicsRoundToInt(fix16_t value);
+void GamePhysicsVectorRoundToInt(TYPE_VECTOR * vector);
 void GamePhysicsInit(void);
 TYPE_VECTOR GamePhysicsVectorEscMul(TYPE_VECTOR * ptrVector, fix16_t x);
 TYPE_VECTOR GamePhysicsVectorDiff(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVector2);
