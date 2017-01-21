@@ -167,9 +167,9 @@ void GameInit(void)
 	GfxSetGlobalLuminance(0);
 
 	track = SystemRand(GAMEPLAY_FIRST_TRACK,GAMEPLAY_LAST_TRACK);
-	
+
 	timeout_flag = false;
-	
+
 	for(i = 0; i < MAX_WAVES; i++)
 	{
 		WaveData[i].position.x = fix16_from_int(i << 6); // i * 64
@@ -209,7 +209,7 @@ void GameInit(void)
 	}
 
 	LoadMenuEnd();
-	
+
 	GameSetTime(2,30 /* TODO: Set time by macros?? */);
 
 	SfxPlayTrack(track);
@@ -260,6 +260,8 @@ void GameCalculations(void)
 	uint8_t i;
 
 	GameClock();
+	
+	GamePhysicsCheckCollisions();
 
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
 	{
@@ -267,7 +269,7 @@ void GameCalculations(void)
 		GamePlayerHandler(&PlayerData[i]);
 		GamePhysicsBallHandler(&PlayerData[i]);
 	}
-	
+
 	for(i = 0; i < MAX_WAVES; i++)
 	{
 		GamePhysicsWaveHandler(&WaveData[i]);
@@ -293,7 +295,7 @@ void GameClock(void)
 		if((--GameSeconds) == 0)
 		{
 			GameSeconds = 60;
-			
+
 			if(GameMinutes > 0)
 			{
 				GameMinutes--;
@@ -310,7 +312,7 @@ void GameClock(void)
 void GameGraphics(void)
 {
 	uint8_t i;
-	
+
 	while(	(GfxIsGPUBusy() == true)
 					||
 			(SystemRefreshNeeded() == false)	);
@@ -326,7 +328,7 @@ void GameGraphics(void)
 	GfxSortSprite(&ParallaxSpr);
 
 	GameRenderWaves();
-	
+
 	for(i = 0; i < MAX_PLAYERS; i++)
 	{
 		GameRenderBall(&PlayerData[i]);
@@ -334,7 +336,7 @@ void GameGraphics(void)
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);
-	
+
 	CameraDrawTarget();
 
 	GfxDrawScene();
@@ -351,7 +353,7 @@ void GameRenderWaves(void)
 	uint8_t i;
 	uint8_t j;
 	GsGPoly4 WaveGPoly4;
-	
+
 	bzero((GsGPoly4*)&WaveGPoly4, sizeof(GsGPoly4)); // Reset data
 	
 	for(i = 0; i < MAX_SECONDROW_WAVES -1 ; i++)
@@ -393,33 +395,33 @@ void GameRenderWaves(void)
 	{
 		WaveGPoly4.x[0] = (short)fix16_to_int(WaveData[i].position.x);
 		WaveGPoly4.x[1] = (short)fix16_to_int(WaveData[i + 1].position.x);
-		
+
 		WaveGPoly4.x[2] = WaveGPoly4.x[0];
 		WaveGPoly4.x[3] = (short)fix16_to_int(WaveData[i + 1].position.x);
-		
+
 		WaveGPoly4.y[0] = (short)fix16_to_int(WaveData[i].position.y);
 		WaveGPoly4.y[1] = (short)fix16_to_int(WaveData[i + 1].position.y);
-		
+
 		WaveGPoly4.y[2] = Y_SCREEN_RESOLUTION;
 		WaveGPoly4.y[3] = Y_SCREEN_RESOLUTION;
-		
+
 		for(j = 0; j < 2; j++)
 		{
 			WaveGPoly4.r[j] = NORMAL_LUMINANCE >> 1;
 			WaveGPoly4.g[j] = NORMAL_LUMINANCE >> 1;
 		}
-		
+
 		for(j = 2; j < 4; j++)
 		{
 			WaveGPoly4.r[j] = NORMAL_LUMINANCE >> 2;
 			WaveGPoly4.g[j] = NORMAL_LUMINANCE >> 2;
 		}
-		
+
 		for(j = 0; j < 4; j++)
 		{
 			WaveGPoly4.b[j] = NORMAL_LUMINANCE;
 		}
-		
+
 		CameraApplyCoordinatesToGsGPoly4(&WaveGPoly4);
 		GfxSortGsGPoly4(&WaveGPoly4);
 	}
@@ -435,11 +437,11 @@ void GameRenderBall(TYPE_PLAYER * ptrPlayer)
 {
 	short final_x = (short)fix16_to_int(ptrPlayer->position.x - (ptrPlayer->radius));
 	short final_y = (short)fix16_to_int(ptrPlayer->position.y - (ptrPlayer->radius));
-	
+
 	ptrPlayer->ptrSprite->x = final_x;
 	ptrPlayer->ptrSprite->y = final_y;
-	
+
 	CameraApplyCoordinatesToSprite(ptrPlayer->ptrSprite);
-	
+
 	GfxSortSprite(ptrPlayer->ptrSprite);
 }
