@@ -37,7 +37,7 @@ enum
 
 enum
 {
-	CLOCK_X = 16,
+	CLOCK_X = (X_SCREEN_RESOLUTION >> 1) - 48,
 	CLOCK_Y = 16
 };
 
@@ -102,12 +102,14 @@ void GameGuiInit(void)
 }
 
 bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
-{	
+{
+	bool show_pause_dialog = true;
+	
 	GfxSaveDisplayData(&SecondDisplay);
 				
 	DrawFBRect(0, 0, X_SCREEN_RESOLUTION, VRAM_H, 0, 0, 0);
 				
-	while(GfxIsGPUBusy() == true);
+	while(GfxIsGPUBusy() == true); // After DrawFBRect, we should wait for GPU to finish
 	
 	do
 	{
@@ -118,7 +120,15 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		
 		GfxSortSprite(&SecondDisplay);
 		
-		GsSortGPoly4(&PauseRect);
+		if(System1SecondTick() == true)
+		{
+			show_pause_dialog = show_pause_dialog ? false : true;
+		}
+		
+		if(show_pause_dialog == true)
+		{
+			GsSortGPoly4(&PauseRect);
+		}
 		
 		GfxDrawScene_Slow();
 		

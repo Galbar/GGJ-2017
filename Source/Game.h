@@ -11,6 +11,7 @@
 #include "System.h"
 #include "Camera.h"
 #include "GameGui.h"
+#include "GamePhysics.h"
 
 /* *************************************
  * 	Defines
@@ -24,6 +25,9 @@
 #define TILE_SIZE 64
 #define LEVEL_TITLE_SIZE 32
 #define TILE_SIZE_BIT_SHIFT 6
+
+#define LEVEL_X_SIZE 640
+#define LEVEL_Y_SIZE 240
 
 /* *************************************
  * 	Global variables
@@ -39,6 +43,6 @@ extern TYPE_WAVE WaveData[];
 
 void 		Game(void);
 char * 		GetGameLevelTitle(void);
-void 		GameSetTime(uint8_t hour, uint8_t minutes);
+void 		GameSetTime(uint8_t minutes, uint8_t seconds);
 
 #endif //__GAME_HEADER__

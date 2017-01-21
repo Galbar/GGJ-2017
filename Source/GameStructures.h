@@ -7,6 +7,7 @@
 
 #define GAME_MAX_CHARACTERS 8
 #define CHEAT_ARRAY_SIZE 16
+#define WAVE_RADIUS 32
 
 /* *************************************
  * 	Structs and enums
@@ -14,13 +15,11 @@
 
 typedef struct t_Camera
 {
-	int32_t X_Offset;
-	int32_t Y_Offset;
+	int16_t X_Offset;
 	int8_t X_Speed;
-	int8_t Y_Speed;
 	uint8_t Speed_Timer;
+	short TargetPos;
 }TYPE_CAMERA;
-
 
 typedef struct t_vector
 {
@@ -30,12 +29,16 @@ typedef struct t_vector
 
 typedef struct t_wave
 {
-
+    TYPE_VECTOR speed;
+    TYPE_VECTOR position;
 }TYPE_WAVE;
 
 typedef struct t_player
 {
+	// States
 	bool dead;
+	bool StateOnWater;
+	
 	uint8_t wind_slots;
 	uint16_t hits;
 	fix16_t radius;
@@ -46,7 +49,20 @@ typedef struct t_player
 	bool	(*PadKeyReleased_Callback)(unsigned short);
 	bool	(*PadDirectionKeyPressed_Callback)(void);
 	TYPE_CAMERA Camera;
+	GsSprite * ptrSprite;
 }TYPE_PLAYER;
+
+typedef struct t_collision
+{
+    bool Obj1Dynamic;
+    bool Obj2Dynamic;
+    TYPE_VECTOR * ptrObj1Position;
+    TYPE_VECTOR * ptrObj2Position;
+    TYPE_VECTOR * ptrObj1Speed;
+    TYPE_VECTOR * ptrObj2Speed;
+    fix16_t intersectionDistance;
+    fix16_t bounceCoeficient;
+}TYPE_COLLISION;
 
 typedef enum t_fontflags
 {
