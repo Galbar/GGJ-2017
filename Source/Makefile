@@ -35,7 +35,7 @@ build: clean objects $(PROJECT).elf $(PROJECT).exe
 	
 objects: 	$(addprefix $(OBJ_DIR)/,main.o System.o Menu.o Gfx.o Pad.o MainMenuBtnAni.o 	\
 									LoadMenu.o GameGui.o Sfx.o Camera.o EndAnimation.o			\
-									PSXSDKIntro.o Game.o Font.o MemCard.o)
+									PSXSDKIntro.o Game.o GamePhysics.o Font.o MemCard.o)
 			
 #music_objects:	$(addprefix ../Music/, TRACK01.bin TRACK02.bin TRACK03.bin)
 			

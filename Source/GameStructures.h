@@ -50,6 +50,18 @@ typedef struct t_player
 	GsSprite * ptrSprite;
 }TYPE_PLAYER;
 
+typedef struct t_collision
+{
+    bool Obj1Dynamic;
+    bool Obj2Dynamic;
+    TYPE_VECTOR * ptrObj1Position;
+    TYPE_VECTOR * ptrObj2Position;
+    TYPE_VECTOR * ptrObj1Speed;
+    TYPE_VECTOR * ptrObj2Speed;
+    fix16_t intersectionDistance;
+    fix16_t bounceCoeficient;
+}TYPE_COLLISION;
+
 typedef enum t_fontflags
 {
 	FONT_NOFLAGS		= 0,
