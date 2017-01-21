@@ -67,6 +67,8 @@ bool Gfx1HzFlash(void);
 // Switches between true and false every 500 milliseconds (used for flashing effects)
 bool Gfx2HzFlash(void);
 
+void GfxSortGsGPoly4(GsGPoly4 * poly);
+
 /* *************************************
  * 	Global variables
  * *************************************/

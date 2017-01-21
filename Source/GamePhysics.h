@@ -15,6 +15,7 @@
  * 	Global prototypes					*
  * **************************************/
 
+void GamePhysicsInit(void);
 TYPE_VECTOR GamePhysicsVectorEscMul(TYPE_VECTOR * ptrVector, fix16_t x);
 TYPE_VECTOR GamePhysicsVectorDiff(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVector2);
 TYPE_VECTOR GamePhysicsVectorMul(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVector2);
@@ -42,3 +43,4 @@ bool GamePhysicsCollidePlayerWithWave(	TYPE_PLAYER * ptrPlayer,
 										TYPE_COLLISION * collision);
 void GamePhysicsCheckCollisions(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2);
 void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer);
+void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave);
