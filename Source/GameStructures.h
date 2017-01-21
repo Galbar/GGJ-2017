@@ -15,13 +15,11 @@
 
 typedef struct t_Camera
 {
-	int32_t X_Offset;
-	int32_t Y_Offset;
+	int16_t X_Offset;
 	int8_t X_Speed;
-	int8_t Y_Speed;
 	uint8_t Speed_Timer;
+	short TargetPos;
 }TYPE_CAMERA;
-
 
 typedef struct t_vector
 {
@@ -49,6 +47,7 @@ typedef struct t_player
 	bool	(*PadKeyReleased_Callback)(unsigned short);
 	bool	(*PadDirectionKeyPressed_Callback)(void);
 	TYPE_CAMERA Camera;
+	GsSprite * ptrSprite;
 }TYPE_PLAYER;
 
 typedef enum t_fontflags

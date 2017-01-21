@@ -171,13 +171,13 @@ void OptionsMenu(void)
 void OnePlayerMenu(void)
 {
 	EndAnimation();
-	Game(false /* One Player Only */);
+	Game();
 }
 
 void TwoPlayerMenu(void)
 {
 	EndAnimation();
-	Game(true /* Two players */);
+	Game();
 }
 
 

@@ -84,7 +84,8 @@ tiles:
 	bmp2tim ../Sprites/Arrows.bmp		../cdimg/DATA/SPRITES/ARROWS.TIM 16 -org=812,304 -mpink
 	bmp2tim ../Sprites/GPL_4bit.bmp		../cdimg/DATA/SPRITES/GPL.TIM 4 -org=384,174 -mpink -clut=384,502
 	bmp2tim ../Sprites/OpSrc_8bit.bmp	../cdimg/DATA/SPRITES/OPENSRC.TIM 8 -org=464,0 -mpink -clut=384,503
-	bmp2tim ../Sprites/Mouse.bmp		../cdimg/DATA/SPRITES/MOUSE.TIM 16 -org=828,304 -mpink
+	bmp2tim ../Sprites/Ball_01.bmp		../cdimg/DATA/SPRITES/BALL_01.TIM 16 -org=496,0 -mpink
+	bmp2tim ../Sprites/Ball_02.bmp		../cdimg/DATA/SPRITES/BALL_02.TIM 16 -org=560,0 -mpink
 	
 sounds:
 	rm -f ../cdimg/DATA/SOUNDS/*.VAG

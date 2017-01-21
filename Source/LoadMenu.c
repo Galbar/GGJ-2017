@@ -80,16 +80,13 @@ static void LoadMenuLoadFileList(	char * fileList[], 	void * dest[],
  * *************************************/
 
 static GsGPoly4 loadMenuBg;
-static GsSprite LoadMenuPlaneSpr;
 static GsSprite LoadMenuTitleSpr;
 static GsLine LoadMenuBarLines[LOADING_BAR_N_LINES];
 static GsRectangle LoadMenuBarRect;
 
-static char * LoadMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\PLANE.TIM;1",
-									"cdrom:\\DATA\\SPRITES\\LOADING.TIM;1",
+static char * LoadMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\LOADING.TIM;1",
 									"cdrom:\\DATA\\FONTS\\FONT_2.FNT;1"	};
-static void * LoadMenuDest[] = {(GsSprite*)&LoadMenuPlaneSpr,
-								(GsSprite*)&LoadMenuTitleSpr,
+static void * LoadMenuDest[] = {(GsSprite*)&LoadMenuTitleSpr,
 								(TYPE_FONT*)&SmallFont		};
 
 static char * strCurrentFile;
@@ -124,13 +121,6 @@ void LoadMenuInit(void)
 	}
 	
 	FontSetSize(&SmallFont, SMALL_FONT_SIZE);
-
-	LoadMenuPlaneSpr.r = 0;
-	LoadMenuPlaneSpr.g = 0;
-	LoadMenuPlaneSpr.b = 0;
-	
-	LoadMenuPlaneSpr.x = PLANE_START_X;
-	LoadMenuPlaneSpr.y = PLANE_START_Y;
 	
 	// "Loading..." title init
 	
@@ -305,13 +295,6 @@ void ISR_LoadMenuVBlank(void)
 			}
 		}
 		
-		if(LoadMenuPlaneSpr.r < PLANE_LUMINANCE_TARGET_VALUE)
-		{
-			LoadMenuPlaneSpr.r += PLANE_LUMINANCE_STEP;
-			LoadMenuPlaneSpr.g += PLANE_LUMINANCE_STEP;
-			LoadMenuPlaneSpr.b += PLANE_LUMINANCE_STEP;
-		}
-		
 	}
 	else if(end_flag == true)
 	{
@@ -342,16 +325,6 @@ void ISR_LoadMenuVBlank(void)
 			end_flag = false;
 			isr_ended = true;
 		}
-			
-		if(LoadMenuPlaneSpr.r > 0)
-		{
-			LoadMenuPlaneSpr.r -= PLANE_LUMINANCE_STEP;
-			LoadMenuPlaneSpr.g -= PLANE_LUMINANCE_STEP;
-			LoadMenuPlaneSpr.b -= PLANE_LUMINANCE_STEP;
-		}
-		
-		LoadMenuPlaneSpr.x = (PLANE_START_X + LOADING_BAR_WIDTH);
-		LoadMenuPlaneSpr.y = PLANE_START_Y;
 		
 		LoadMenuBarRect.w = LOADING_BAR_WIDTH;
 		
@@ -383,14 +356,6 @@ void ISR_LoadMenuVBlank(void)
 	}
 	
 	GsSortSprite(&LoadMenuTitleSpr);
-	
-	LoadMenuPlaneSpr.w = PLANE_SIZE;
-	LoadMenuPlaneSpr.h = PLANE_SIZE;
-	
-	LoadMenuPlaneSpr.u = PLANE_U;
-	LoadMenuPlaneSpr.v = PLANE_V;
-	
-	GsSortSprite(&LoadMenuPlaneSpr);
 	
 	FontSetFlags(&SmallFont, FONT_BLEND_EFFECT);
 	
@@ -455,10 +420,6 @@ void LoadMenuLoadFileList(	char * fileList[], 	void * dest[],
 		strCurrentFile = fileList[fileLoadedCount];
 		
 		x_increment = (short)(LOADING_BAR_WIDTH / szFileList);
-		
-		// Calculate new X position for loading menu plane sprite.
-		// This is not calculated on ISR as to avoid longer ISR time.
-		LoadMenuPlaneSpr.x = (PLANE_START_X + (fileLoadedCount* x_increment) );
 		
 		LoadMenuBarRect.w = fileLoadedCount* x_increment;
 						

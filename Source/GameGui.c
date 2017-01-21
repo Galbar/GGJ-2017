@@ -102,12 +102,14 @@ void GameGuiInit(void)
 }
 
 bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
-{	
+{
+	bool show_pause_dialog = true;
+	
 	GfxSaveDisplayData(&SecondDisplay);
 				
 	DrawFBRect(0, 0, X_SCREEN_RESOLUTION, VRAM_H, 0, 0, 0);
 				
-	while(GfxIsGPUBusy() == true);
+	while(GfxIsGPUBusy() == true); // After DrawFBRect, we should wait for GPU to finish
 	
 	do
 	{
@@ -118,7 +120,16 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		
 		GfxSortSprite(&SecondDisplay);
 		
-		GsSortGPoly4(&PauseRect);
+		if(System1SecondTick() == true)
+		{
+			show_pause_dialog = show_pause_dialog ? false : true;
+		}
+		
+		if(show_pause_dialog == true)
+		{
+			dprintf("%d\n",show_pause_dialog);
+			GsSortGPoly4(&PauseRect);
+		}
 		
 		GfxDrawScene_Slow();
 		
