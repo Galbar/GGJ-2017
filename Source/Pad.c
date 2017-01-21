@@ -118,6 +118,11 @@ bool PadOneAnyKeyPressed(void)
 	return (bool)pad1;
 }
 
+bool PadOneAnyKeyReleased(void)
+{
+	return !(bool)pad1 && (bool)previous_pad1;
+}
+
 bool PadOneDirectionKeyPressed(void)
 {
 	return (	(PadOneKeyPressed(PAD_UP) == true)

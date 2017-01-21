@@ -12,45 +12,37 @@
 #define BUTTON_SIZE 64
 #define SELECTED_BUTTON_LUMINANCE 0xC0
 
+
 /* **************************************
  * 	Structs and enums					*
  * *************************************/
 
 typedef enum
 {
-	PLAY_OPTIONS_LEVEL = 0,
-	ONE_TWO_PLAYERS_LEVEL
+	PLAY_CREDITS_LEVEL = 0,
+	CREDITS_LEVEL
 }MainMenuLevel;
 
 enum
 {
-	MAIN_MENU_PLAY_OPTIONS_LEVEL_BUTTONS = 2,
-	MAIN_MENU_ONE_TWO_PLAYERS_LEVEL_BUTTONS = 2
+	MAIN_MENU_PLAY_CREDITS_LEVEL_BUTTONS = 2
 };
 
 typedef enum
 {
 	PLAY_BUTTON_INDEX = 0,
-	OPTIONS_BUTTON_INDEX,
-	ONE_PLAYER_BUTTON_INDEX,
-	TWO_PLAYER_BUTTON_INDEX,
+	CREDITS_BUTTON_INDEX,
 	
 	MAIN_MENU_BUTTONS_MAX
 }MMBtn_Index;
 
-enum
+enum //384x256
 {
-	MAIN_MENU_PLAY_BUTTON_X = 92,
-	MAIN_MENU_PLAY_BUTTON_Y = 92,
+	MAIN_MENU_PLAY_BUTTON_X = X_SCREEN_RESOLUTION/2 - BUTTON_SIZE/2,
+	MAIN_MENU_PLAY_BUTTON_Y = Y_SCREEN_RESOLUTION/2 - BUTTON_SIZE/2,
 	
-	MAIN_MENU_OPTIONS_BUTTON_X = 225,
-	MAIN_MENU_OPTIONS_BUTTON_Y = 92,
-	
-	MAIN_MENU_ONE_PLAYER_BUTTON_X = 92,
-	MAIN_MENU_ONE_PLAYER_BUTTON_Y = 92,
-	
-	MAIN_MENU_TWO_PLAYER_BUTTON_X = 225,
-	MAIN_MENU_TWO_PLAYER_BUTTON_Y = 92	
+	MAIN_MENU_CREDITS_BUTTON_X = X_SCREEN_RESOLUTION - BUTTON_SIZE,
+	MAIN_MENU_CREDITS_BUTTON_Y = Y_SCREEN_RESOLUTION - BUTTON_SIZE - 10,
 };
 
 typedef enum
@@ -58,14 +50,8 @@ typedef enum
 	PLAY_BUTTON_U_OFFSET = 0,
 	PLAY_BUTTON_Y_OFFSET = 64,
 	
-	ONE_PLAYER_BUTTON_U_OFFSET = 128,
-	ONE_PLAYER_BUTTON_Y_OFFSET = 64,
-	
-	OPTIONS_BUTTON_U_OFFSET = 64,
-	OPTIONS_BUTTON_Y_OFFSET = 64,
-	
-	TWO_PLAYER_BUTTON_U_OFFSET = 192,
-	TWO_PLAYER_BUTTON_Y_OFFSET = 64,
+	CREDITS_BUTTON_U_OFFSET = 64,
+	CREDITS_BUTTON_Y_OFFSET = 64,
 	
 	DEFAULT_BUTTON_U_OFFSET = 0,
 	DEFAULT_BUTTON_V_OFFSET = 128
@@ -97,10 +83,11 @@ typedef struct
  * **************************************/
 
 static void MainMenuDrawButton(TYPE_MMBtn * btn);
+static void CreditsDraw(void);
 static void PlayMenu(void);
-static void OptionsMenu(void);
-static void OnePlayerMenu(void);
-static void TwoPlayerMenu(void);
+static void CreditsMenu(void);
+//static void OnePlayerMenu(void);
+//static void TwoPlayerMenu(void);
 static void MainMenuButtonHandler(void);
 static void MainMenuRestoreInitValues(void);
 static void MenuTestCheat(void);
@@ -143,43 +130,21 @@ static MMBtn_Index MainMenuMinimumBtn;
 
 void PlayMenu(void)
 {
-	menuLevel = ONE_TWO_PLAYERS_LEVEL;
-	MainMenuMinimumBtn = ONE_PLAYER_BUTTON_INDEX;
-	
+	EndAnimation();
+	Game();
+}
+
+void CreditsMenu(void)
+{
+	menuLevel = CREDITS_LEVEL;
+
 	MainMenuBtn[PLAY_BUTTON_INDEX].selected = false;
 	MainMenuBtn[PLAY_BUTTON_INDEX].was_selected = false;
 	MainMenuBtn[PLAY_BUTTON_INDEX].timer = 0;
-	
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].selected = false;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].timer = 0;
-	
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].selected = true;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].timer = 0;
-	
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].selected = false;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].timer = 0;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].selected = false;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].was_selected = false;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].timer = 0;
 }
-
-void OptionsMenu(void)
-{
-	dprintf("OptionsMenu(void)!\n");
-}
-
-void OnePlayerMenu(void)
-{
-	EndAnimation();
-	Game();
-}
-
-void TwoPlayerMenu(void)
-{
-	EndAnimation();
-	Game();
-}
-
 
 void MainMenuInit(void)
 {
@@ -193,25 +158,13 @@ void MainMenuInit(void)
 	MainMenuBtn[PLAY_BUTTON_INDEX].f = &PlayMenu;
 	MainMenuBtn[PLAY_BUTTON_INDEX].i = PLAY_BUTTON_INDEX;
 	
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].offset_u = OPTIONS_BUTTON_U_OFFSET;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].offset_v = OPTIONS_BUTTON_Y_OFFSET;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].timer = 0;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].f = &OptionsMenu;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].i = OPTIONS_BUTTON_INDEX;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].offset_u = CREDITS_BUTTON_U_OFFSET;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].offset_v = CREDITS_BUTTON_Y_OFFSET;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].timer = 0;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].f = &CreditsMenu;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].i = CREDITS_BUTTON_INDEX;
 	
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].offset_u = ONE_PLAYER_BUTTON_U_OFFSET;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].offset_v = ONE_PLAYER_BUTTON_Y_OFFSET;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].timer = 0;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].f = &OnePlayerMenu;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].i = ONE_PLAYER_BUTTON_INDEX;
-	
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].offset_u = TWO_PLAYER_BUTTON_U_OFFSET;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].offset_v = TWO_PLAYER_BUTTON_Y_OFFSET;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].timer = 0;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].f = &TwoPlayerMenu;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].i = TWO_PLAYER_BUTTON_INDEX;
-	
-	menuLevel = PLAY_OPTIONS_LEVEL;
+	menuLevel = PLAY_CREDITS_LEVEL;
 	
 	MainMenuMinimumBtn = PLAY_BUTTON_INDEX;
 	
@@ -258,22 +211,20 @@ void MainMenu(void)
 		
 		switch(menuLevel)
 		{
-			case PLAY_OPTIONS_LEVEL:
+			case PLAY_CREDITS_LEVEL:
 				while(SystemDMAReady() == false);
 				
 				GsSortCls(0,0,40);				
 				MainMenuDrawButton(&MainMenuBtn[PLAY_BUTTON_INDEX]);
-				MainMenuDrawButton(&MainMenuBtn[OPTIONS_BUTTON_INDEX]);
+				MainMenuDrawButton(&MainMenuBtn[CREDITS_BUTTON_INDEX]);
 			
 				GfxDrawScene();
 			break;
 			
-			case ONE_TWO_PLAYERS_LEVEL:
-				while(SystemDMAReady() == false);
-				
+			case CREDITS_LEVEL:
+				printf("%s\n", "credits level");
 				GsSortCls(0,0,40);				
-				MainMenuDrawButton(&MainMenuBtn[ONE_PLAYER_BUTTON_INDEX]);
-				MainMenuDrawButton(&MainMenuBtn[TWO_PLAYER_BUTTON_INDEX]);
+				CreditsDraw();
 				GfxDrawScene();
 			break;
 			
@@ -286,24 +237,16 @@ void MainMenu(void)
 
 void MainMenuRestoreInitValues(void)
 {
-	menuLevel = PLAY_OPTIONS_LEVEL;
+	menuLevel = PLAY_CREDITS_LEVEL;
 	MainMenuMinimumBtn = PLAY_BUTTON_INDEX;
 	
 	MainMenuBtn[PLAY_BUTTON_INDEX].selected = true;
 	MainMenuBtn[PLAY_BUTTON_INDEX].was_selected = false;
 	MainMenuBtn[PLAY_BUTTON_INDEX].timer = 0;
 	
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].selected = false;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[OPTIONS_BUTTON_INDEX].timer = 0;
-	
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].selected = false;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[ONE_PLAYER_BUTTON_INDEX].timer = 0;
-	
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].selected = false;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].was_selected = false;
-	MainMenuBtn[TWO_PLAYER_BUTTON_INDEX].timer = 0;	
+	MainMenuBtn[CREDITS_BUTTON_INDEX].selected = false;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].was_selected = false;
+	MainMenuBtn[CREDITS_BUTTON_INDEX].timer = 0;
 }
 
 void MainMenuButtonHandler(void)
@@ -311,6 +254,7 @@ void MainMenuButtonHandler(void)
 	static uint8_t btn_selected = PLAY_BUTTON_INDEX;
 	static uint8_t previous_btn_selected = 0;
 	uint8_t max_buttons;
+	bool justExitedCredits = false;
 	
 	if(PadOneAnyKeyPressed() == true)
 	{
@@ -329,16 +273,17 @@ void MainMenuButtonHandler(void)
 	
 	switch(menuLevel)
 	{
-		case PLAY_OPTIONS_LEVEL:
-			max_buttons = MAIN_MENU_PLAY_OPTIONS_LEVEL_BUTTONS;
+		case PLAY_CREDITS_LEVEL:
+			max_buttons = MAIN_MENU_PLAY_CREDITS_LEVEL_BUTTONS;
 		break;
 		
-		case ONE_TWO_PLAYERS_LEVEL:
-			max_buttons = MAIN_MENU_ONE_TWO_PLAYERS_LEVEL_BUTTONS;
-			if(PadOneKeyReleased(PAD_TRIANGLE) == true)
+		case CREDITS_LEVEL:
+			max_buttons = 0;
+			if(PadOneAnyKeyReleased() == true)
 			{
-				menuLevel = PLAY_OPTIONS_LEVEL;
-				MainMenuMinimumBtn = PLAY_BUTTON_INDEX;
+				MainMenuRestoreInitValues();
+				max_buttons = MAIN_MENU_PLAY_CREDITS_LEVEL_BUTTONS;
+				justExitedCredits = true;
 				btn_selected = PLAY_BUTTON_INDEX;
 			}
 		break;
@@ -379,9 +324,9 @@ void MainMenuButtonHandler(void)
 		btn_selected = (max_buttons - 1 + MainMenuMinimumBtn);
 	}
 	
-	if(PadOneKeyReleased(PAD_CROSS) )
+	if(PadOneKeyReleased(PAD_CROSS) && !justExitedCredits)
 	{
-		if(menuLevel == ONE_TWO_PLAYERS_LEVEL)
+		if(btn_selected == PLAY_BUTTON_INDEX)
 		{
 			MainMenuBtn[btn_selected].f();
 			// Once gameplay has finished, turn back to first level
@@ -391,20 +336,17 @@ void MainMenuButtonHandler(void)
 		else
 		{
 			MainMenuBtn[btn_selected].f();
-		}
-		
-		
-		
-		if(menuLevel == ONE_TWO_PLAYERS_LEVEL)
-		{
-			btn_selected = PLAY_BUTTON_INDEX;
-		}
-		
+		}			
 	}
 	
-	MainMenuBtn[btn_selected].selected = true;
+	MainMenuBtn[btn_selected].selected = true;	
+}
 
-	
+void CreditsDraw()
+{
+	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5, Y_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 2,"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -\n -Aria Serra");
+
+	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 7, Y_SCREEN_RESOLUTION -FONT_DEFAULT_CHAR_SIZE * 2, "Press any button to return");
 }
 
 void MainMenuDrawButton(TYPE_MMBtn * btn)
@@ -449,33 +391,15 @@ void MainMenuDrawButton(TYPE_MMBtn * btn)
 			GsSortSprite(&MenuSpr);
 		break;
 		
-		case OPTIONS_BUTTON_INDEX:
-			MenuSpr.x = MAIN_MENU_OPTIONS_BUTTON_X;
-			MenuSpr.y = MAIN_MENU_OPTIONS_BUTTON_Y - MainMenuBtnAni[btn->timer];
+		case CREDITS_BUTTON_INDEX:
+			MenuSpr.x = MAIN_MENU_CREDITS_BUTTON_X;
+			MenuSpr.y = MAIN_MENU_CREDITS_BUTTON_Y - MainMenuBtnAni[btn->timer];
 			MenuSpr.u += btn->offset_u;
 			MenuSpr.v += btn->offset_v;
 					
 			GsSortSprite(&MenuSpr);
 		break;
-		
-		case ONE_PLAYER_BUTTON_INDEX:
-			MenuSpr.x = MAIN_MENU_ONE_PLAYER_BUTTON_X;
-			MenuSpr.y = MAIN_MENU_ONE_PLAYER_BUTTON_Y - MainMenuBtnAni[btn->timer];
-			MenuSpr.u += btn->offset_u;
-			MenuSpr.v += btn->offset_v;
-					
-			GsSortSprite(&MenuSpr);
-		break;
-		
-		case TWO_PLAYER_BUTTON_INDEX:
-			MenuSpr.x = MAIN_MENU_TWO_PLAYER_BUTTON_X;
-			MenuSpr.y = MAIN_MENU_TWO_PLAYER_BUTTON_Y - MainMenuBtnAni[btn->timer];
-			MenuSpr.u += btn->offset_u;
-			MenuSpr.v += btn->offset_v;
-					
-			GsSortSprite(&MenuSpr);
-		break;
-		
+
 		default:
 		break;
 	}
