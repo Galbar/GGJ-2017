@@ -31,12 +31,14 @@ typedef struct t_wave
 {
     fix16_t y_speed;
     TYPE_VECTOR position;
-    TYPE_VECTOR scale;
 }TYPE_WAVE;
 
 typedef struct t_player
 {
+	// States
 	bool dead;
+	bool StateOnWater;
+	
 	uint8_t wind_slots;
 	uint16_t hits;
 	fix16_t radius;
