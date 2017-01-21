@@ -461,43 +461,52 @@ void GamePhysicsTackleHandler(TYPE_PLAYER * ptrPlayer)
 	ptrPlayer->position.x += ptrPlayer->speed.x;
 }
 
-bool GamePhysicsResolveCollision(TYPE_COLLISION * collision)
+bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision)
 {
 	TYPE_VECTOR N = GamePhysicsVectorDiff(collision->ptrObj2Position, collision->ptrObj1Position);
 	TYPE_VECTOR vNormal;
 	TYPE_VECTOR vTangent;
 	TYPE_VECTOR tmp;
-	fix16_t dist = GamePhysicsVectorMagnitude(&N) - collision->obj1Radius + collision->obj2Radius;
 	fix16_t angle;
+	fix16_t dist = GamePhysicsVectorMagnitude(&N) - collision->obj1Radius + collision->obj2Radius;
 
-	if (dist < 0)
+	if(dist < 0)
 	{
-		if (collision->Obj1Dynamic && collision->Obj2Dynamic)
-		{
-			// tots dos son pilotes
-		}
-		else if (collision->Obj2Dynamic)
-		{
-			angle = GamePhysicsAngleBetweenVectors(&N, collision->ptrObj1Speed) - fix16_pi;
+		return true;
+	}
 
-			vNormal = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_cos(angle));
+	angle = GamePhysicsAngleBetweenVectors(&N, collision->ptrObj1Speed) - fix16_pi;
 
-			tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_cos(angle));
-			tmp = GamePhysicsVectorAdd(&vNormal, &tmp);
+	vNormal = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_cos(angle));
 
-			vNormal = GamePhysicsVectorEscMul(&tmp, -collision->bounceCoeficient);
+	tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_cos(angle));
+	tmp = GamePhysicsVectorAdd(&vNormal, &tmp);
 
-			vTangent = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_sin(angle));
+	vNormal = GamePhysicsVectorEscMul(&tmp, -collision->bounceCoeficient);
 
-			tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_sin(angle));
-			tmp = GamePhysicsVectorAdd(&vTangent, &tmp);
+	vTangent = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_sin(angle));
 
-			vTangent = GamePhysicsVectorEscMul(&tmp, collision->frictionCoeficient);
+	tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_sin(angle));
+	tmp = GamePhysicsVectorAdd(&vTangent, &tmp);
 
-			*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &N);
-			*collision->ptrObj1Speed = GamePhysicsVectorAdd(&vNormal, &vTangent);
-		}
-		return false;
+	vTangent = GamePhysicsVectorEscMul(&tmp, collision->frictionCoeficient);
+
+	*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &N);
+	*collision->ptrObj1Speed = GamePhysicsVectorAdd(&vNormal, &vTangent);
+
+	return false;
+}
+
+bool GamePhysicsResolveCollision(TYPE_COLLISION * collision)
+{
+	if (collision->Obj1Dynamic && collision->Obj2Dynamic)
+	{
+		// tots dos son pilotes
+		return true;
+	}
+	else if (!collision->Obj2Dynamic)
+	{
+		return GamePhysicsResolveBallAndWaveCollision(collision);
 	}
 	return true;
 }
