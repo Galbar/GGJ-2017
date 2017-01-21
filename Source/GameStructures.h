@@ -29,7 +29,7 @@ typedef struct t_vector
 
 typedef struct t_wave
 {
-    fix16_t y_speed;
+    TYPE_VECTOR speed;
     TYPE_VECTOR position;
 }TYPE_WAVE;
 
