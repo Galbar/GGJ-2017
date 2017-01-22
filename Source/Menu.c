@@ -313,9 +313,9 @@ void MainMenuButtonHandler(void)
 		}
 	}
 
-	if(	(PadOneKeyReleased(PAD_CROSS) == true)
+	if(	(PadOneKeySinglePressed(PAD_CROSS) == true)
 				||
-		(PadOneKeyReleased(PAD_TRIANGLE) == true)	)
+		(PadOneKeySinglePressed(PAD_TRIANGLE) == true)	)
 	{
 		SfxPlaySound(&AcceptSnd);
 	}
@@ -345,14 +345,14 @@ void MainMenuButtonHandler(void)
 	MainMenuBtn[previous_btn_selected].was_selected = MainMenuBtn[previous_btn_selected].selected;
 	MainMenuBtn[btn_selected].was_selected = MainMenuBtn[btn_selected].selected;
 
-	if(PadOneKeyReleased(PAD_LEFT)	&& (btn_selected > 0) )
+	if(PadOneKeySinglePressed(PAD_LEFT)	&& (btn_selected > 0) )
 	{
 		MainMenuBtn[btn_selected].selected = false;
 		previous_btn_selected = btn_selected;
 		btn_selected--;
 		SfxPlaySound(&BellSnd);
 	}
-	else if( (PadOneKeyReleased(PAD_RIGHT) == true)
+	else if( (PadOneKeySinglePressed(PAD_RIGHT) == true)
 				&&
 			(btn_selected < (max_buttons - 1 + MainMenuMinimumBtn) ) )
 	{
@@ -373,7 +373,7 @@ void MainMenuButtonHandler(void)
 		btn_selected = (max_buttons - 1 + MainMenuMinimumBtn);
 	}
 
-	if(PadOneKeyReleased(PAD_CROSS) && !justExitedCredits)
+	if(PadOneKeySinglePressed(PAD_CROSS) && !justExitedCredits)
 	{
 		if(btn_selected == PLAY_BUTTON_INDEX)
 		{

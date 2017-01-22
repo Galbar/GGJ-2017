@@ -58,14 +58,17 @@ static GsSprite PlayerTwoBall;
 static GsSprite KillerCactusSpr;
 static TYPE_TIMER * PlayerOneCooldownTimer;
 static TYPE_TIMER * PlayerTwoCooldownTimer;
+static SsVag SplashSnd;
 
 static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\CACTUS.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\CACTUS.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\SPLASH.VAG;1"	};
 
 static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall	,
 								(GsSprite*)&PlayerTwoBall	,
-								(GsSprite*)&KillerCactusSpr	};
+								(GsSprite*)&KillerCactusSpr	,
+								(SsVag*)&SplashSnd			};
 
 //Game local time
 static uint8_t GameMinutes;
@@ -161,6 +164,9 @@ void GameInit(void)
 	PlayerData[PLAYER_ONE].position.x = BALL_ONE_INIT_POS;
 	PlayerData[PLAYER_ONE].position.y = fix16_from_int(64); //TEST, remove ASAP
 	
+	PlayerData[PLAYER_ONE].speed.x = 0;
+	PlayerData[PLAYER_ONE].speed.y = 0;
+	
 	PlayerData[PLAYER_ONE].PadKeyPressed_Callback = &PadOneKeyPressed;
 	PlayerData[PLAYER_ONE].PadKeyReleased_Callback = &PadOneKeyReleased;
 	PlayerData[PLAYER_ONE].PadKeyPressedSingle_Callback = &PadOneKeySinglePressed;
@@ -171,6 +177,7 @@ void GameInit(void)
 	PlayerData[PLAYER_ONE].StateOnWater = true;
 	PlayerData[PLAYER_ONE].wind_slots = WIND_SLOTS;
 	PlayerData[PLAYER_ONE].lifes_left = INIT_LIFES_LEFT;
+	PlayerData[PLAYER_ONE].dead = false;
 	
 	//dprintf("Player 1 init DONE!\n");
 	
@@ -178,6 +185,9 @@ void GameInit(void)
 
 	PlayerData[PLAYER_TWO].position.x = BALL_TWO_INIT_POS;
 	PlayerData[PLAYER_TWO].position.y = fix16_from_int(64); //TEST, remove ASAP
+	
+	PlayerData[PLAYER_TWO].speed.x = 0;
+	PlayerData[PLAYER_TWO].speed.y = 0;
 	
 	PlayerData[PLAYER_TWO].PadKeyPressedSingle_Callback = &PadTwoKeySinglePressed;
 	PlayerData[PLAYER_TWO].PadKeyPressed_Callback = &PadTwoKeyPressed;
@@ -189,6 +199,7 @@ void GameInit(void)
 	PlayerData[PLAYER_TWO].StateOnWater = true;
 	PlayerData[PLAYER_TWO].wind_slots = WIND_SLOTS;
 	PlayerData[PLAYER_TWO].lifes_left = INIT_LIFES_LEFT;
+	PlayerData[PLAYER_TWO].dead = false;
 	
 	//dprintf("Player 2 init DONE!\n");
 
@@ -390,6 +401,19 @@ void GameGraphics(void)
 		GameRenderBall(&PlayerData[i]);
 		GameGuiBeachSign(&PlayerData[i], i);
 		GameGuiWindSlots(&PlayerData[i], i);
+		
+		if(PlayerData[i].dead == true)
+		{
+			RadioFont.spr.r = 0;
+			RadioFont.spr.g = 0;
+			RadioFont.spr.b = 0;
+			
+			FontPrintText(&RadioFont, 72, 48, "Player %d wins!", (i ? 0:1) + 1);
+			
+			RadioFont.spr.r = NORMAL_LUMINANCE;
+			RadioFont.spr.g = NORMAL_LUMINANCE;
+			RadioFont.spr.b = NORMAL_LUMINANCE;
+		}
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);

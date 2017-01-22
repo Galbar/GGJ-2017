@@ -103,6 +103,7 @@ sounds:
 	wav2vag ../Sounds/Accept.wav 	../cdimg/DATA/SOUNDS/ACCEPT.VAG
 	wav2vag ../Sounds/TrayCl.wav 	../cdimg/DATA/SOUNDS/TRAYCL.VAG
 	wav2vag ../Sounds/SpinDisk.wav	../cdimg/DATA/SOUNDS/SPINDISK.VAG
+	wav2vag ../Sounds/Splash.wav	../cdimg/DATA/SOUNDS/SPLASH.VAG
 
 #music: clean_music music_objects
 
