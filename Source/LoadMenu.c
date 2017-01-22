@@ -245,6 +245,8 @@ void ISR_LoadMenuVBlank(void)
 		return;
 	}
 	
+	isr_executing = true;
+	
 	if(startup_flag == true)
 	{
 		// "Loading..." text
@@ -346,7 +348,8 @@ void ISR_LoadMenuVBlank(void)
 		}
 	}
 	
-	GsSortGPoly4(&loadMenuBg);
+	//GsSortGPoly4(&loadMenuBg);
+	GsSortCls(0,0,0);
 	
 	GsSortRectangle(&LoadMenuBarRect);
 	
@@ -355,7 +358,7 @@ void ISR_LoadMenuVBlank(void)
 		GsSortLine(&LoadMenuBarLines[i]);
 	}
 	
-	GsSortSprite(&LoadMenuTitleSpr);
+	//GsSortSprite(&LoadMenuTitleSpr);
 	
 	FontSetFlags(&SmallFont, FONT_BLEND_EFFECT);
 	
@@ -367,6 +370,8 @@ void ISR_LoadMenuVBlank(void)
 	FontSetFlags(&SmallFont, FONT_NOFLAGS);
 		
 	GfxDrawScene_Fast();
+	
+	isr_executing = false;
 }
 
 bool LoadMenuISRHasEnded(void)

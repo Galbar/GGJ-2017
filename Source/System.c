@@ -16,6 +16,12 @@
 #define STACK_SIZE 0x1000
 
 /* *************************************
+ * 	Global Variables
+ * *************************************/
+
+volatile bool isr_executing; 
+
+/* *************************************
  * 	Local Prototypes
  * *************************************/
  
@@ -34,6 +40,7 @@ static volatile uint64_t global_timer;
 static bool rand_seed;
 //Screen refresh flag (called by interrupt)
 static volatile bool refresh_needed;
+
 //Timers
 static bool one_second_timer;
 static bool hundred_ms_timer;
@@ -210,6 +217,8 @@ bool SystemLoadFileToBuffer(char * fname, uint8_t * buffer, uint32_t szBuffer)
 	memset(buffer,0,szBuffer);
 	
 	system_busy = true;
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
+	
 	f = fopen(fname, "r");
 	
 	if(f == NULL)
@@ -218,8 +227,12 @@ bool SystemLoadFileToBuffer(char * fname, uint8_t * buffer, uint32_t szBuffer)
 		//File couldn't be found
 		return false;
 	}
+	
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
 
 	fseek(f, 0, SEEK_END);	
+	
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
 
 	size = ftell(f);
 	
@@ -230,9 +243,15 @@ bool SystemLoadFileToBuffer(char * fname, uint8_t * buffer, uint32_t szBuffer)
 		return false;
 	}
 	
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
+	
 	fseek(f, 0, SEEK_SET); //f->pos = 0;
 	
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
+	
 	fread(buffer, sizeof(char), size, f);
+	
+	while(isr_executing == true || GfxIsGPUBusy() == true || SystemDMABusy() == true);
 	
 	fclose(f);
 	

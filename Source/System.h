@@ -98,5 +98,7 @@ int32_t SystemIndexOf_U8(uint8_t value, uint8_t * array, uint32_t from, uint32_t
 /* **************************************
  * 	Global Variables					*	
  * **************************************/
+ 
+extern volatile bool isr_executing; 
 
 #endif //__SYSTEM_HEADER__
