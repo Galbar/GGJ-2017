@@ -352,7 +352,7 @@ void MainMenuButtonHandler(void)
 		btn_selected--;
 		SfxPlaySound(&BellSnd);
 	}
-	else if(PadOneKeyReleased(PAD_RIGHT)
+	else if( (PadOneKeyReleased(PAD_RIGHT) == true)
 				&&
 			(btn_selected < (max_buttons - 1 + MainMenuMinimumBtn) ) )
 	{

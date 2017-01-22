@@ -14,7 +14,7 @@
 #define BALL_RADIUS (fix16_from_int(16))
 #define WIND_SLOTS 4
 #define WIND_COOLDOWN_TIME_SECS 1
-#define INIT_LIFES_LEFT 5
+#define INIT_LIFES_LEFT 2
 
 /* **************************************
  * 	Structs and enums					*
@@ -292,6 +292,13 @@ void GameEmergencyMode(void)
 void GameCalculations(void)
 {
 	uint8_t i;
+	
+	if(	(PlayerData[PLAYER_ONE].dead == true)
+						||
+		(PlayerData[PLAYER_TWO].dead == true)	)
+	{
+		return;
+	}
 
 	GameClock();
 	

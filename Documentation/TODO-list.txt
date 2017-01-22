@@ -1,7 +1,5 @@
-Colisión cactus-Win, lose
-Créditos
+Win, lose
 Gestión vidas
-Cámara
 Sonido viento
 Sonido impacto
 Sonido pinchazo

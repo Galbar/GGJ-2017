@@ -640,7 +640,11 @@ void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer)
 		
 		ptrPlayer->speed.x = -ptrPlayer->speed.x;
 		
-		if(--ptrPlayer->lifes_left == 0)
+		ptrPlayer->lifes_left--;
+		
+		dprintf("Lifes left: %d\n", ptrPlayer->lifes_left);
+		
+		if(ptrPlayer->lifes_left == 0)
 		{
 			ptrPlayer->dead = true;
 		}
@@ -651,7 +655,11 @@ void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer)
 		
 		ptrPlayer->speed.x = -ptrPlayer->speed.x;
 		
-		if(--ptrPlayer->lifes_left == 0)
+		ptrPlayer->lifes_left--;
+		
+		dprintf("Lifes left: %d\n", ptrPlayer->lifes_left);
+		
+		if(ptrPlayer->lifes_left == 0)
 		{
 			ptrPlayer->dead = true;
 		}

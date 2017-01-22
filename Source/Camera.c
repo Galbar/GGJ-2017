@@ -8,8 +8,8 @@
  * 	Defines
  * *************************************/
 
-#define SPEED_CALCULATION_TIME 3
-#define MAX_CAMERA_SPEED 4
+#define SPEED_CALCULATION_TIME 2
+#define MAX_CAMERA_SPEED 3
 #define MIN_CAMERA_SPEED 1
 #define CAMERA_INITIAL_X_OFFSET (X_SCREEN_RESOLUTION >> 1)
 #define CAMERA_FAST_MOVEMENT_THRESHOLD 16
@@ -107,11 +107,6 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		return;
 	}
 	
-	// ptrPlayer->PadKeyPressed_Callback(PAD_LEFT)
-	// target_X < x_offset
-	
-	//dprintf("CAMERA DIFF = %d\n",camera_diff);
-	
 	ref_value = hysteresis ? CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS: CAMERA_FAST_MOVEMENT_THRESHOLD;
 	
 	if(camera_diff < -ref_value)
@@ -133,7 +128,7 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		
 		if(Camera.X_Speed > 0)
 		{
-			Camera.X_Speed --;
+			Camera.X_Speed--;
 		}
 		else if(Camera.X_Speed > -MAX_CAMERA_SPEED)
 		{
