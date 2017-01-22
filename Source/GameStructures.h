@@ -49,6 +49,7 @@ typedef struct t_player
 	TYPE_VECTOR position;
 	TYPE_VECTOR speed;
 
+	bool	(*PadKeyPressedSingle_Callback)(unsigned short);
 	bool	(*PadKeyPressed_Callback)(unsigned short);
 	bool	(*PadKeyReleased_Callback)(unsigned short);
 	bool	(*PadDirectionKeyPressed_Callback)(void);

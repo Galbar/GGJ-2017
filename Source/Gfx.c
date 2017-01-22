@@ -181,6 +181,17 @@ void GfxSortSprite(GsSprite * spr)
 	short aux_x = spr->x;
 	bool has_1hz_flash = spr->attribute & GFX_1HZ_FLASH;
 	bool has_2hz_flash = spr->attribute & GFX_2HZ_FLASH;
+	short max_size_allowed;
+	short orig_w = spr->w;
+	
+	if(spr->attribute & (COLORMODE(COLORMODE_4BPP)))
+	{
+		max_size_allowed = MAX_SIZE_FOR_GSSPRITE_4BIT;
+	}
+	else
+	{
+		max_size_allowed = MAX_SIZE_FOR_GSSPRITE;
+	}
 	
 	if(	(spr->w <= 0) || (spr->h <= 0) )
 	{
@@ -193,6 +204,10 @@ void GfxSortSprite(GsSprite * spr)
 		return;
 	}
 	else if(has_2hz_flash && Gfx2HzFlash() == false)
+	{
+		return;
+	}
+	else if(has_1hz_flash && Gfx1HzFlash() == false)
 	{
 		return;
 	}
@@ -232,23 +247,25 @@ void GfxSortSprite(GsSprite * spr)
 		spr->attribute &= ~(GFX_1HZ_FLASH);
 	}
 	
-	if(spr->w > MAX_SIZE_FOR_GSSPRITE)
+	if(spr->w > max_size_allowed)
 	{
 		// GsSprites can't be bigger than 256x256, so since display
 		// resolution is 384x240, it must be split into two primitives.
 		
-		spr->w = MAX_SIZE_FOR_GSSPRITE;
+		spr->w = max_size_allowed;
 		GsSortSprite(spr);
 
-		spr->x += MAX_SIZE_FOR_GSSPRITE;
-		spr->w = X_SCREEN_RESOLUTION - MAX_SIZE_FOR_GSSPRITE;
-		spr->tpage += MAX_SIZE_FOR_GSSPRITE / GFX_TPAGE_WIDTH;
+		spr->x += max_size_allowed;
+		spr->w = orig_w - max_size_allowed;
+		spr->tpage += max_size_allowed / GFX_TPAGE_WIDTH;
 		GsSortSprite(spr);
 		
 		// Restore original values after sorting
 		spr->w = aux_w;
 		spr->tpage = aux_tpage;
 		spr->x = aux_x;
+		
+		spr->w = orig_w;
 	}
 	else
 	{

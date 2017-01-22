@@ -17,6 +17,8 @@
 #define GAMEPHYSICS_MAX_NORMAL_SPEED (0x8000) // 8.00
 #define GAMEPHYSICS_LAUNCH_SPEED (-0x60000) // 8.00
 #define GAMEPHYSICS_INITIAL_WAVE_SPEED 0x20000
+#define GAMEPHYSICS_WINDBLOW_SPEED (0x1C000)
+#define GAMEPHYSICS_WINDBLOW_SPEED_MAX (0x5C000)
 
 #define FRICT_COEF_BALLS 0xCCCC // 0.8
 #define FRICT_COEF_WAVES 0x4CCC // 0.3
@@ -275,29 +277,26 @@ bool GamePhysicsCollidePlayerWithWave(	TYPE_PLAYER * ptrPlayer,
 
 void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer)
 {
-	if(ptrPlayer->PadKeyReleased_Callback(PAD_CROSS) == true)
+	if(ptrPlayer->PadKeyPressedSingle_Callback(PAD_CROSS) == true)
 	{
 		if(ptrPlayer->StateOnWater == true)
 		{
 			ptrPlayer->StateOnWater = false;
 			ptrPlayer->speed.y = GAMEPHYSICS_LAUNCH_SPEED; // Jump!!
 		}
-	}
-	else if(	(ptrPlayer->PadKeyReleased_Callback(PAD_CIRCLE) == true)
-										&&
-				(ptrPlayer->StateTackle == false)	)
-	{
-		if(ptrPlayer->PadKeyPressed_Callback(PAD_LEFT) == true)
+		else if(ptrPlayer->StateTackle == false)
 		{
-			ptrPlayer->StateTackle = true;
-			ptrPlayer->speed.x = -GAMEPHYSICS_TACKLE_SPEED;
+			if(ptrPlayer->PadKeyPressed_Callback(PAD_LEFT) == true)
+			{
+				ptrPlayer->StateTackle = true;
+				ptrPlayer->speed.x = -GAMEPHYSICS_TACKLE_SPEED;
+			}
+			else if(ptrPlayer->PadKeyPressed_Callback(PAD_RIGHT) == true)
+			{
+				ptrPlayer->StateTackle = true;
+				ptrPlayer->speed.x = GAMEPHYSICS_TACKLE_SPEED;
+			}
 		}
-		else if(ptrPlayer->PadKeyPressed_Callback(PAD_RIGHT) == true)
-		{
-			ptrPlayer->StateTackle = true;
-			ptrPlayer->speed.x = GAMEPHYSICS_TACKLE_SPEED;
-		}
-		
 	}
 	
 	if(	(ptrPlayer->StateTackle == false)
@@ -587,3 +586,30 @@ void GamePhysicsResolveCollisions()
 	} while(!all_solved );
 
 }
+
+void GamePhysicsRightWindBlow(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
+{
+	if((ptrPlayer1->speed.x + GAMEPHYSICS_WINDBLOW_SPEED) < GAMEPHYSICS_WINDBLOW_SPEED_MAX)
+	{
+		ptrPlayer1->speed.x += GAMEPHYSICS_WINDBLOW_SPEED;
+	}
+	
+	if((ptrPlayer2->speed.x + GAMEPHYSICS_WINDBLOW_SPEED) < GAMEPHYSICS_WINDBLOW_SPEED_MAX)
+	{
+		ptrPlayer2->speed.x += GAMEPHYSICS_WINDBLOW_SPEED;
+	}
+}
+
+void GamePhysicsLeftWindBlow(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
+{
+	if((ptrPlayer1->speed.x - GAMEPHYSICS_WINDBLOW_SPEED) > -GAMEPHYSICS_WINDBLOW_SPEED_MAX)
+	{
+		ptrPlayer1->speed.x -= GAMEPHYSICS_WINDBLOW_SPEED;
+	}
+	
+	if((ptrPlayer1->speed.x - GAMEPHYSICS_WINDBLOW_SPEED) > -GAMEPHYSICS_WINDBLOW_SPEED_MAX)
+	{
+		ptrPlayer2->speed.x -= GAMEPHYSICS_WINDBLOW_SPEED;
+	}
+}
+

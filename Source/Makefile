@@ -1,5 +1,5 @@
 CC = psx-gcc
-DEFINE= -DFIXMATH_FAST_SIN -D_PAL_MODE_ -DPSXSDK_DEBUG -DNO_CDDA -DNO_INTRO
+DEFINE= -DFIXMATH_FAST_SIN -D_PAL_MODE_ -DNO_CDDA -DPSXSDK_DEBUG -DNO_INTRO
 LIBS= -lfixmath
 CC_FLAGS = -Wall -Werror -c -Os
 LINKER = psx-gcc
@@ -77,7 +77,7 @@ tiles:
 	rm -f ../cdimg/DATA/FONTS/*.FNT
 	bmp2tim ../Sprites/PSXDisk.bmp 		../cdimg/DATA/SPRITES/PSXDISK.TIM 16 -org=384,0 -mpink
 	bmp2tim ../Sprites/IntroFnt.bmp 	../cdimg/DATA/SPRITES/INTROFNT.TIM 16 -org=384,76 -mpink
-	bmp2tim ../Sprites/MainMenu.bmp 	../cdimg/DATA/SPRITES/MAINMENU.TIM 16 -org=768,384 -mpink
+	bmp2tim ../Sprites/MainMenu.bmp 	../cdimg/DATA/SPRITES/MAINMENU.TIM 16 -org=768,448 -mpink
 	bmp2tim ../Sprites/Loading.bmp 		../cdimg/DATA/SPRITES/LOADING.TIM 4 -mpink -org=768,256 -clut=384,496
 	bmp2tim ../Sprites/Buttons.bmp 		../cdimg/DATA/SPRITES/BUTTONS.TIM 16 -org=784,288 -mpink
 	bmp2tim ../Sprites/Font_1_4bit.bmp	../cdimg/DATA/FONTS/FONT_1.FNT 4 -org=960,256 -mpink -clut=384,500
@@ -90,6 +90,9 @@ tiles:
 	bmp2tim ../Sprites/Parallax.bmp		../cdimg/DATA/SPRITES/PARALLAX.TIM 16 -org=640,0
 	bmp2tim ../Sprites/LeftArr.bmp		../cdimg/DATA/SPRITES/LEFTARR.TIM 16 -org=528,16 -mpink
 	bmp2tim ../Sprites/RightArr.bmp		../cdimg/DATA/SPRITES/RIGHTARR.TIM 16 -org=576,16 -mpink
+	bmp2tim ../Sprites/Logo.bmp			../cdimg/DATA/SPRITES/LOGO.TIM 8 -org=546,96 -mpink -clut=384,504
+	bmp2tim ../Sprites/Pause.bmp		../cdimg/DATA/SPRITES/PAUSE.TIM 8 -org=768,352 -mpink -clut=384,505
+	bmp2tim ../Sprites/Cactus.bmp		../cdimg/DATA/SPRITES/CACTUS.TIM 16 -org=896,256 -mpink
 	
 sounds:
 	rm -f ../cdimg/DATA/SOUNDS/*.VAG

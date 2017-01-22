@@ -9,10 +9,11 @@
  * *************************************/
 
 #define TILE_MIRROR_FLAG ( (uint8_t)0x80 )
-#define BALL_ONE_INIT_POS (fix16_from_int(0))
-#define BALL_TWO_INIT_POS (fix16_from_int(256))
+#define BALL_ONE_INIT_POS (fix16_from_int(224))
+#define BALL_TWO_INIT_POS (fix16_from_int(LEVEL_X_SIZE - 224))
 #define BALL_RADIUS (fix16_from_int(16))
 #define WIND_SLOTS 4
+#define WIND_COOLDOWN_TIME_SECS 2
 
 /* **************************************
  * 	Structs and enums					*
@@ -23,15 +24,18 @@
  * *************************************/
 
 static void GameInit(void);
-static void GameLoadLevel(void);
 static bool GamePause(void);
 static void GameEmergencyMode(void);
 static void GameCalculations(void);
 static void GamePlayerHandler(TYPE_PLAYER * ptrPlayer);
 static void GameGraphics(void);
 static void GameRenderWaves(void);
+static void GameRenderKillerCactus(void);
+static void GameRenderBackground(void);
 static void GameClock(void);
 static void GameRenderBall(TYPE_PLAYER * ptrPlayer);
+static void GamePlayerOneCooldownTimerExpired(void);
+static void GamePlayerTwoCooldownTimerExpired(void);
 
 /* *************************************
  * 	Global Variables
@@ -50,15 +54,17 @@ TYPE_WAVE WaveSecondRowData[MAX_SECONDROW_WAVES];
 
 static GsSprite PlayerOneBall;
 static GsSprite PlayerTwoBall;
-static GsSprite ParallaxSpr;
+static GsSprite KillerCactusSpr;
+static TYPE_TIMER * PlayerOneCooldownTimer;
+static TYPE_TIMER * PlayerTwoCooldownTimer;
 
 static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\PARALLAX.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\CACTUS.TIM;1"	};
 
-static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall,
-								(GsSprite*)&PlayerTwoBall,
-								(GsSprite*)&ParallaxSpr	 };
+static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall	,
+								(GsSprite*)&PlayerTwoBall	,
+								(GsSprite*)&KillerCactusSpr	};
 
 //Game local time
 static uint8_t GameMinutes;
@@ -88,10 +94,11 @@ void Game(void)
 			GameStartupFlag = false;
 		}
 	}
+	
+	SystemTimerRemove(PlayerOneCooldownTimer);
+	SystemTimerRemove(PlayerTwoCooldownTimer);
 
 	EndAnimation();
-
-	SfxPlayTrack(INTRO_TRACK);
 }
 
 bool GamePause(void)
@@ -131,7 +138,6 @@ bool GamePause(void)
 
 void GameInit(void)
 {
-	uint32_t track;
 	uint8_t i;
 
 	GameStartupFlag = true;
@@ -141,37 +147,55 @@ void GameInit(void)
 				sizeof(GameFileList) / sizeof(char*),
 				sizeof(GameFileDest) /sizeof(void*)	);
 
-	GameLoadLevel();
-
 	GameGuiInit();
+	
+	// Player 1 init
 
 	PlayerData[PLAYER_ONE].position.x = BALL_ONE_INIT_POS;
-	PlayerData[PLAYER_ONE].position.y = fix16_from_int(128); //TEST, remove ASAP
+	PlayerData[PLAYER_ONE].position.y = fix16_from_int(64); //TEST, remove ASAP
+	
 	PlayerData[PLAYER_ONE].PadKeyPressed_Callback = &PadOneKeyPressed;
 	PlayerData[PLAYER_ONE].PadKeyReleased_Callback = &PadOneKeyReleased;
+	PlayerData[PLAYER_ONE].PadKeyPressedSingle_Callback = &PadOneKeySinglePressed;
 	PlayerData[PLAYER_ONE].PadDirectionKeyPressed_Callback = &PadOneDirectionKeyPressed;
+	
 	PlayerData[PLAYER_ONE].ptrSprite = &PlayerOneBall;
 	PlayerData[PLAYER_ONE].radius = BALL_RADIUS;
 	PlayerData[PLAYER_ONE].StateOnWater = true;
 	PlayerData[PLAYER_ONE].wind_slots = WIND_SLOTS;
+	
+	//dprintf("Player 1 init DONE!\n");
+	
+	// Player 2 init
 
 	PlayerData[PLAYER_TWO].position.x = BALL_TWO_INIT_POS;
-	PlayerData[PLAYER_TWO].position.y = fix16_from_int(128); //TEST, remove ASAP
+	PlayerData[PLAYER_TWO].position.y = fix16_from_int(64); //TEST, remove ASAP
+	
+	PlayerData[PLAYER_TWO].PadKeyPressedSingle_Callback = &PadTwoKeySinglePressed;
 	PlayerData[PLAYER_TWO].PadKeyPressed_Callback = &PadTwoKeyPressed;
 	PlayerData[PLAYER_TWO].PadKeyReleased_Callback = &PadTwoKeyReleased;
 	PlayerData[PLAYER_TWO].PadDirectionKeyPressed_Callback = &PadTwoDirectionKeyPressed;
+	
 	PlayerData[PLAYER_TWO].ptrSprite = &PlayerTwoBall;
 	PlayerData[PLAYER_TWO].radius = BALL_RADIUS;
 	PlayerData[PLAYER_TWO].StateOnWater = true;
 	PlayerData[PLAYER_TWO].wind_slots = WIND_SLOTS;
+	
+	//dprintf("Player 2 init DONE!\n");
 
 	CameraInit();
 
 	GfxSetGlobalLuminance(0);
 
-	track = SystemRand(GAMEPLAY_FIRST_TRACK,GAMEPLAY_LAST_TRACK);
-
 	timeout_flag = false;
+	
+	PlayerOneCooldownTimer = SystemCreateTimer(	WIND_COOLDOWN_TIME_SECS,
+												true,
+												&GamePlayerOneCooldownTimerExpired );
+												
+	PlayerTwoCooldownTimer = SystemCreateTimer(	WIND_COOLDOWN_TIME_SECS,
+												true,
+												&GamePlayerTwoCooldownTimerExpired );
 
 	for(i = 0; i < MAX_WAVES; i++)
 	{
@@ -214,8 +238,6 @@ void GameInit(void)
 	LoadMenuEnd();
 
 	GameSetTime(2,30 /* TODO: Set time by macros?? */);
-
-	SfxPlayTrack(track);
 }
 
 void GameEmergencyMode(void)
@@ -289,7 +311,22 @@ void GameCalculations(void)
 
 void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)
 {
-
+	if(ptrPlayer->PadKeyPressedSingle_Callback(PAD_R1) == true)
+	{
+		if(ptrPlayer->wind_slots > 0)
+		{
+			ptrPlayer->wind_slots--;
+			GamePhysicsRightWindBlow(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
+		}
+	}
+	else if(ptrPlayer->PadKeyPressedSingle_Callback(PAD_L1) == true)
+	{
+		if(ptrPlayer->wind_slots > 0)
+		{
+			ptrPlayer->wind_slots--;
+			GamePhysicsLeftWindBlow(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
+		}
+	}
 }
 
 void GameClock(void)
@@ -321,17 +358,11 @@ void GameGraphics(void)
 					||
 			(SystemRefreshNeeded() == false)	);
 			
-	ParallaxSpr.x = 0;
-	ParallaxSpr.y = 0;
-	ParallaxSpr.r = NORMAL_LUMINANCE;
-	ParallaxSpr.g = NORMAL_LUMINANCE;
-	ParallaxSpr.b = NORMAL_LUMINANCE;
-	
-	GsSortCls(0,0,0);
-
-	GfxSortSprite(&ParallaxSpr);
+	GameRenderBackground();
 
 	GameRenderWaves();
+	
+	GameRenderKillerCactus();
 
 	for(i = 0; i < MAX_PLAYERS; i++)
 	{
@@ -341,16 +372,8 @@ void GameGraphics(void)
 
 	GameGuiClock(GameMinutes, GameSeconds);
 
-	CameraDrawTarget();
-
 	GfxDrawScene();
 }
-
-void GameLoadLevel(void)
-{
-
-}
-
 
 void GameRenderWaves(void)
 {
@@ -448,4 +471,68 @@ void GameRenderBall(TYPE_PLAYER * ptrPlayer)
 	CameraApplyCoordinatesToSprite(ptrPlayer->ptrSprite);
 
 	GfxSortSprite(ptrPlayer->ptrSprite);
+}
+
+void GamePlayerOneCooldownTimerExpired(void)
+{
+	TYPE_PLAYER * ptrPlayer = &PlayerData[PLAYER_ONE];
+	
+	if(ptrPlayer->wind_slots < WIND_SLOTS)
+	{
+		dprintf("Player one wind slots = %d\n", ptrPlayer->wind_slots);
+		ptrPlayer->wind_slots++;
+	}
+}
+
+void GamePlayerTwoCooldownTimerExpired(void)
+{
+	TYPE_PLAYER * ptrPlayer = &PlayerData[PLAYER_TWO];
+	
+	if(ptrPlayer->wind_slots < WIND_SLOTS)
+	{
+		dprintf("Player two wind slots = %d\n", ptrPlayer->wind_slots);
+		ptrPlayer->wind_slots++;
+	}
+}
+
+void GameRenderBackground(void)
+{
+	ParallaxSpr.x = 0;
+	ParallaxSpr.y = 0;
+	ParallaxSpr.r = NORMAL_LUMINANCE;
+	ParallaxSpr.g = NORMAL_LUMINANCE;
+	ParallaxSpr.b = NORMAL_LUMINANCE;
+
+	CameraApplyCoordinatesToParallax(&ParallaxSpr);
+	GfxSortSprite(&ParallaxSpr);
+	
+	ParallaxSpr.x = X_SCREEN_RESOLUTION;
+	ParallaxSpr.y = 0;
+	ParallaxSpr.r = NORMAL_LUMINANCE;
+	ParallaxSpr.g = NORMAL_LUMINANCE;
+	ParallaxSpr.b = NORMAL_LUMINANCE;
+	
+	CameraApplyCoordinatesToParallax(&ParallaxSpr);
+	GfxSortSprite(&ParallaxSpr);
+}
+
+void GameRenderKillerCactus(void)
+{
+	KillerCactusSpr.x = 0;
+	KillerCactusSpr.y = 0;
+	
+	CameraApplyCoordinatesToSprite(&KillerCactusSpr);
+	
+	KillerCactusSpr.attribute &= ~(H_FLIP);
+	
+	GfxSortSprite(&KillerCactusSpr);
+	
+	KillerCactusSpr.x = LEVEL_X_SIZE - KillerCactusSpr.w;
+	KillerCactusSpr.y = 0;
+	
+	KillerCactusSpr.attribute |= H_FLIP;
+	
+	CameraApplyCoordinatesToSprite(&KillerCactusSpr);
+	
+	GfxSortSprite(&KillerCactusSpr);
 }

@@ -14,8 +14,8 @@
  
 enum
 {
-	PAUSE_DIALOG_X = 92,
-	PAUSE_DIALOG_Y = 28,
+	PAUSE_DIALOG_X = 48,
+	PAUSE_DIALOG_Y = 32,
 	PAUSE_DIALOG_W = 200,
 	PAUSE_DIALOG_H = 184,
 	
@@ -48,6 +48,18 @@ enum
 	GAME_GUI_SECOND_DISPLAY_TPAGE = 22,
 };
 
+enum
+{
+	GAME_GUI_WIND_SLOT_PLAYER_ONE_X = 64,
+	GAME_GUI_WIND_SLOT_PLAYER_ONE_Y = 64,
+	
+	GAME_GUI_WIND_SLOT_PLAYER_TWO_X = X_SCREEN_RESOLUTION - 86,
+	GAME_GUI_WIND_SLOT_PLAYER_TWO_Y = 64,
+	
+	GAME_GUI_WIND_SLOT_PLAYER_W = 16,
+	GAME_GUI_WIND_SLOT_PLAYER_H = 8
+};
+
 /* **************************************
  * 	Local prototypes					*
  * *************************************/
@@ -63,15 +75,21 @@ static GsSprite SecondDisplay;
 static GsSprite LeftArrowSpr;
 static GsSprite RightArrowSpr;
 
+static GsSprite PauseSpr;
+
+static GsRectangle WindSlotRect; // Temporary
+
 static char * GameFileList[] = {"cdrom:\\DATA\\FONTS\\FONT_1.FNT;1"		,
 								"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\LEFTARR.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\RIGHTARR.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\RIGHTARR.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\PAUSE.TIM;1"	};
 								
 static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont		,
 								(GsSprite*)&ArrowsSpr		,
 								(GsSprite*)&LeftArrowSpr	,
-								(GsSprite*)&RightArrowSpr	};
+								(GsSprite*)&RightArrowSpr	,
+								(GsSprite*)&PauseSpr		};	
 
 void GameGuiInit(void)
 {
@@ -79,39 +97,16 @@ void GameGuiInit(void)
 				GameFileDest,
 				sizeof(GameFileList) / sizeof(char*),
 				sizeof(GameFileDest) /sizeof(void*)	);
-				
-	PauseRect.x[0] = PAUSE_DIALOG_X;
-	PauseRect.x[1] = PAUSE_DIALOG_X + PAUSE_DIALOG_W;
-	PauseRect.x[2] = PAUSE_DIALOG_X;
-	PauseRect.x[3] = PAUSE_DIALOG_X + PAUSE_DIALOG_W;
 	
-	PauseRect.y[0] = PAUSE_DIALOG_Y;
-	PauseRect.y[1] = PAUSE_DIALOG_Y;
-	PauseRect.y[2] = PAUSE_DIALOG_Y + PAUSE_DIALOG_H;
-	PauseRect.y[3] = PAUSE_DIALOG_Y + PAUSE_DIALOG_H;
-	
-	PauseRect.r[0] = PAUSE_DIALOG_R0;
-	PauseRect.r[1] = PAUSE_DIALOG_R1;
-	PauseRect.r[2] = PAUSE_DIALOG_R2;
-	PauseRect.r[3] = PAUSE_DIALOG_R3;
-	
-	PauseRect.b[0] = PAUSE_DIALOG_B0;
-	PauseRect.b[1] = PAUSE_DIALOG_B1;
-	PauseRect.b[2] = PAUSE_DIALOG_B2;
-	PauseRect.b[3] = PAUSE_DIALOG_B3;
-	
-	PauseRect.g[0] = PAUSE_DIALOG_G0;
-	PauseRect.g[1] = PAUSE_DIALOG_G1;
-	PauseRect.g[2] = PAUSE_DIALOG_G2;
-	PauseRect.g[3] = PAUSE_DIALOG_G3;
+	WindSlotRect.w = GAME_GUI_WIND_SLOT_PLAYER_W;
+	WindSlotRect.h = GAME_GUI_WIND_SLOT_PLAYER_H;
 	
 	PauseRect.attribute |= ENABLE_TRANS | TRANS_MODE(0);
 }
 
 bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 {
-	bool show_pause_dialog = true;
-	
+
 	GfxSaveDisplayData(&SecondDisplay);
 				
 	DrawFBRect(0, 0, X_SCREEN_RESOLUTION, VRAM_H, 0, 0, 0);
@@ -127,15 +122,12 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		
 		GfxSortSprite(&SecondDisplay);
 		
-		if(System1SecondTick() == true)
-		{
-			show_pause_dialog = show_pause_dialog ? false : true;
-		}
+		PauseSpr.attribute |= GFX_1HZ_FLASH;
 		
-		if(show_pause_dialog == true)
-		{
-			GsSortGPoly4(&PauseRect);
-		}
+		PauseSpr.x = PAUSE_DIALOG_X;
+		PauseSpr.y = PAUSE_DIALOG_Y;
+		
+		GfxSortSprite(&PauseSpr);
 		
 		GfxDrawScene_Slow();
 		

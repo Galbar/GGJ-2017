@@ -56,4 +56,6 @@ bool GamePhysicsResolveBallAndBallCollision(TYPE_COLLISION * collision);
 bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision);
 void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave);
 void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer);
+void GamePhysicsRightWindBlow(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2);
+void GamePhysicsLeftWindBlow(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2);
 

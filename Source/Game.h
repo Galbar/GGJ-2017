@@ -12,6 +12,7 @@
 #include "Camera.h"
 #include "GameGui.h"
 #include "GamePhysics.h"
+#include "Menu.h"
 
 /* *************************************
  * 	Defines
@@ -27,7 +28,7 @@
 #define LEVEL_TITLE_SIZE 32
 #define TILE_SIZE_BIT_SHIFT 6
 
-#define LEVEL_X_SIZE 832
+#define LEVEL_X_SIZE 768
 #define LEVEL_Y_SIZE 240
 
 /* *************************************

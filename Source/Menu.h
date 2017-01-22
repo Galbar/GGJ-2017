@@ -27,4 +27,10 @@
 
 void MainMenu(void);
 
+/* *************************************
+ * 	Global variables
+ * *************************************/
+
+extern GsSprite ParallaxSpr;
+
 #endif //__MENU_HEADER__

@@ -44,6 +44,9 @@ bool PadTwoDirectionKeyPressed(void);
 bool PadOneDirectionKeyReleased(void);
 bool PadTwoDirectionKeyReleased(void);
 
+bool PadOneKeySinglePressed(unsigned short key);
+bool PadTwoKeySinglePressed(unsigned short key);
+
 bool UpdatePads(void);
 bool PadOneIsVibrationEnabled(void);
 bool PadTwoIsVibrationEnabled(void);

@@ -27,21 +27,20 @@ static bool CameraSpecialConditions(void);
  * *************************************/
 
 static TYPE_CAMERA Camera;
-static GsRectangle TargetRect;
 
 void CameraInit(void)
 {
 	bzero((TYPE_CAMERA*)&Camera, sizeof(TYPE_CAMERA));
-	TargetRect.w = 8;
-	TargetRect.h = 8;
-	TargetRect.r = 255;
-	TargetRect.g = 255;
-	TargetRect.b = 255;
 }
 
 void CameraApplyCoordinatesToSprite(GsSprite * spr)
 {
 	spr->x += (short)Camera.X_Offset;
+}
+
+void CameraApplyCoordinatesToParallax(GsSprite * spr)
+{
+	spr->x += (short)Camera.X_Offset >> 2;
 }
 
 void CameraApplyCoordinatesToRectangle(GsRectangle * rect)
@@ -93,7 +92,7 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	if(((-Camera.X_Offset) + camera_diff) < 0)
 	{
-		//dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
+		dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
 		// Do not go too much left!
 		Camera.X_Speed = 0;
 		return;
@@ -101,7 +100,7 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	// LEVEL_SIZE : 640 x 240
 	
-	if((Camera.X_Offset + camera_diff) >= (LEVEL_X_SIZE - (X_SCREEN_RESOLUTION >> 1) ) )
+	if((camera_diff - Camera.X_Offset) >= X_SCREEN_RESOLUTION )
 	{
 		//dprintf("Right edge exceeded!\n");
 		Camera.X_Speed = 0;
@@ -111,7 +110,7 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	// ptrPlayer->PadKeyPressed_Callback(PAD_LEFT)
 	// target_X < x_offset
 	
-	dprintf("CAMERA DIFF = %d\n",camera_diff);
+	//dprintf("CAMERA DIFF = %d\n",camera_diff);
 	
 	ref_value = hysteresis ? CAMERA_FAST_MOVEMENT_THRESHOLD_HYSTERESIS: CAMERA_FAST_MOVEMENT_THRESHOLD;
 	
@@ -176,9 +175,6 @@ void CameraHandler(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 		return;
 	}
 	
-	TargetRect.x = Camera.TargetPos;
-	TargetRect.y = 128;
-	
 	if(Camera.Speed_Timer < SPEED_CALCULATION_TIME)
 	{
 		Camera.Speed_Timer++;
@@ -195,10 +191,4 @@ void CameraHandler(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 bool CameraSpecialConditions(void)
 {
 	return false;
-}
-
-void CameraDrawTarget(void)
-{
-	CameraApplyCoordinatesToRectangle(&TargetRect);
-	GsSortRectangle(&TargetRect);
 }

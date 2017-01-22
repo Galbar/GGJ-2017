@@ -363,7 +363,6 @@ void PSXSDKIntroRunTimers(void)
 		(PSXSDKIntroStringEvent == false)	)
 	{
 		PSXSDKIntroStringEvent = true;
-		SfxPlayTrack(INTRO_TRACK);
 		intro_timer = 0;
 	}
 	
@@ -404,8 +403,6 @@ void PSXSDKIntroDrawDisk(void)
 		if(PSXSDKIntroSpinDiskEventReminder == false)
 		{
 			PSXSDKIntroSpinDiskEventReminder = true;
-			
-			//SfxPlaySound(&SpinDiskSnd);
 		}
 			
 		if(spin_speed < MAX_DISK_SPIN)

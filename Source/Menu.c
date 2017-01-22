@@ -12,7 +12,6 @@
 #define BUTTON_SIZE 64
 #define SELECTED_BUTTON_LUMINANCE 0xC0
 
-
 /* **************************************
  * 	Structs and enums					*
  * *************************************/
@@ -36,25 +35,31 @@ typedef enum
 	MAIN_MENU_BUTTONS_MAX
 }MMBtn_Index;
 
-enum //384x256
+enum //384x240
 {
-	MAIN_MENU_PLAY_BUTTON_X = X_SCREEN_RESOLUTION/2 - BUTTON_SIZE/2,
-	MAIN_MENU_PLAY_BUTTON_Y = Y_SCREEN_RESOLUTION/2 - BUTTON_SIZE/2,
+	MAIN_MENU_PLAY_BUTTON_X = 92,
+	MAIN_MENU_PLAY_BUTTON_Y = 148,
 
-	MAIN_MENU_CREDITS_BUTTON_X = X_SCREEN_RESOLUTION - BUTTON_SIZE,
-	MAIN_MENU_CREDITS_BUTTON_Y = Y_SCREEN_RESOLUTION - BUTTON_SIZE - 10,
+	MAIN_MENU_CREDITS_BUTTON_X = 224,
+	MAIN_MENU_CREDITS_BUTTON_Y = 148,
+};
+
+enum
+{
+	MAIN_MENU_LOGO_X = 96,
+	MAIN_MENU_LOGO_Y = 0
 };
 
 typedef enum
 {
 	PLAY_BUTTON_U_OFFSET = 0,
-	PLAY_BUTTON_Y_OFFSET = 64,
+	PLAY_BUTTON_Y_OFFSET = 256-64,
 
-	CREDITS_BUTTON_U_OFFSET = 64,
-	CREDITS_BUTTON_Y_OFFSET = 64,
+	CREDITS_BUTTON_U_OFFSET = PLAY_BUTTON_U_OFFSET + 64,
+	CREDITS_BUTTON_Y_OFFSET = PLAY_BUTTON_Y_OFFSET,
 
 	DEFAULT_BUTTON_U_OFFSET = 0,
-	DEFAULT_BUTTON_V_OFFSET = 128
+	DEFAULT_BUTTON_V_OFFSET = 0
 
 }MMBtn_Offset;
 
@@ -77,6 +82,13 @@ typedef struct
 
 }TYPE_MMBtn;
 #pragma pack()
+
+
+/* **************************************
+ * 	Global variables					*
+ * **************************************/
+
+GsSprite ParallaxSpr;
 
 /* **************************************
  * 	Local prototypes					*
@@ -101,6 +113,7 @@ static SsVag BellSnd;
 static SsVag AcceptSnd;
 static TYPE_CHEAT TestCheat;
 static TYPE_CHEAT StackCheckCheat;
+static GsSprite LogoSpr;
 
 static char * MainMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\MAINMENU.TIM;1"	,
 									"cdrom:\\DATA\\SOUNDS\\BELL.VAG;1"		,
@@ -111,7 +124,9 @@ static char * MainMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\MAINMENU.TIM;1"	,
 									"cdrom:\\DATA\\SPRITES\\GPL.TIM;1"		,
 									"cdrom:\\DATA\\SPRITES\\OPENSRC.TIM;1"	,
 									"cdrom:\\DATA\\SOUNDS\\TRAYCL.VAG;1"	,
-									"cdrom:\\DATA\\SOUNDS\\SPINDISK.VAG;1"	};
+									"cdrom:\\DATA\\SOUNDS\\SPINDISK.VAG;1"	,
+									"cdrom:\\DATA\\SPRITES\\PARALLAX.TIM;1" ,
+									"cdrom:\\DATA\\SPRITES\\LOGO.TIM;1" 	};
 
 static void * MainMenuDest[] = {	(GsSprite*)&MenuSpr			,
 									(SsVag*)&BellSnd			,
@@ -122,7 +137,9 @@ static void * MainMenuDest[] = {	(GsSprite*)&MenuSpr			,
 									(GsSprite*)&GPL_Logo		,
 									(GsSprite*)&OpenSource_Logo	,
 									(SsVag*)&TrayClSnd			,
-									(SsVag*)&SpinDiskSnd		};
+									(SsVag*)&SpinDiskSnd		,
+									(GsSprite*)&ParallaxSpr		,
+									(GsSprite*)&LogoSpr			};
 
 static TYPE_MMBtn MainMenuBtn[MAIN_MENU_BUTTONS_MAX];
 static MainMenuLevel menuLevel;
@@ -167,6 +184,13 @@ void MainMenuInit(void)
 	menuLevel = PLAY_CREDITS_LEVEL;
 
 	MainMenuMinimumBtn = PLAY_BUTTON_INDEX;
+	
+	LogoSpr.x = MAIN_MENU_LOGO_X;
+	LogoSpr.y = MAIN_MENU_LOGO_Y;
+	
+	LogoSpr.r = NORMAL_LUMINANCE;
+	LogoSpr.g = NORMAL_LUMINANCE;
+	LogoSpr.b = NORMAL_LUMINANCE;
 
 	TestCheat.Callback = &MenuTestCheat;
 	memset(TestCheat.Combination,0,CHEAT_ARRAY_SIZE);
@@ -198,7 +222,6 @@ void MainMenuInit(void)
 
 void MainMenu(void)
 {
-
 	MainMenuInit();
 
 	#ifndef NO_INTRO
@@ -208,29 +231,55 @@ void MainMenu(void)
 	while(1)
 	{
 		MainMenuButtonHandler();
+		
+		ParallaxSpr.x = 0;
+		ParallaxSpr.y = 0;
+		
+		ParallaxSpr.w = X_SCREEN_RESOLUTION;
+		ParallaxSpr.h = Y_SCREEN_RESOLUTION;
+		
+		ParallaxSpr.tpage = 10;
+		
+		ParallaxSpr.u = 0;
+		ParallaxSpr.v = 0;
+		
+		ParallaxSpr.r = NORMAL_LUMINANCE;
+		ParallaxSpr.g = NORMAL_LUMINANCE;
+		ParallaxSpr.b = NORMAL_LUMINANCE;
+		
+		GfxSetGlobalLuminance(NORMAL_LUMINANCE);
 
 		switch(menuLevel)
 		{
 			case PLAY_CREDITS_LEVEL:
-				while(SystemDMAReady() == false);
-
-				GsSortCls(0,0,40);
+				GsSortCls(11,170,210);
+				
+				GfxSortSprite(&ParallaxSpr);
+				
 				MainMenuDrawButton(&MainMenuBtn[PLAY_BUTTON_INDEX]);
 				MainMenuDrawButton(&MainMenuBtn[CREDITS_BUTTON_INDEX]);
+				
+				GfxSortSprite(&LogoSpr);
 
-				GfxDrawScene();
+				GfxDrawScene_Slow();
 			break;
 
 			case CREDITS_LEVEL:
-				printf("%s\n", "credits level");
-				GsSortCls(0,0,40);
+				GsSortCls(11,170,210); 	// RGB (11 170 210) is the colour of background sea
+										// Easy way to extend background without sacrificing VRAM
+				
+				GfxSortSprite(&ParallaxSpr);
+				
 				CreditsDraw();
-				GfxDrawScene();
+				
+				GfxSortSprite(&LogoSpr);
+				
+				GfxDrawScene_Slow();
 			break;
 
 			default:
 			break;
-		}
+		}		
 	}
 
 }
@@ -344,9 +393,24 @@ void MainMenuButtonHandler(void)
 
 void CreditsDraw()
 {
-	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5, Y_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 2,"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -Alessio Linares\n -Aria Serra");
+	SmallFont.spr.r = 0;
+	SmallFont.spr.g = 0;
+	SmallFont.spr.b = 0;
+	
+	FontPrintText(	&SmallFont,
+					X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5,
+					Y_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 2,
+					"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -Alessio Linares\n -Aria Serra");
 
-	FontPrintText(&SmallFont, X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 7, Y_SCREEN_RESOLUTION -FONT_DEFAULT_CHAR_SIZE * 2, "Press any button to return");
+	FontPrintText(	&SmallFont,
+					X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 7,
+					Y_SCREEN_RESOLUTION -FONT_DEFAULT_CHAR_SIZE * 2,
+					"Press any button to return"	);
+					
+	SmallFont.spr.r = NORMAL_LUMINANCE;
+	SmallFont.spr.g = NORMAL_LUMINANCE;
+	SmallFont.spr.b = NORMAL_LUMINANCE;
+	
 }
 
 void MainMenuDrawButton(TYPE_MMBtn * btn)

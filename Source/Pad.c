@@ -118,6 +118,11 @@ bool PadOneAnyKeyPressed(void)
 	return (bool)pad1;
 }
 
+bool PadOneKeySinglePressed(unsigned short key)
+{
+	return (bool)(pad1 & key) && !(bool)(previous_pad1 & key);
+}
+
 bool PadOneAnyKeyReleased(void)
 {
 	return !(bool)pad1 && (bool)previous_pad1;
@@ -154,6 +159,11 @@ bool PadTwoDirectionKeyReleased(void)
 				(PadTwoKeyReleased(PAD_RIGHT) == true)
 						||
 				(PadTwoKeyReleased(PAD_DOWN) == true)	);
+}
+
+bool PadTwoKeySinglePressed(unsigned short key)
+{
+	return (bool)(pad2 & key) && !(bool)(previous_pad2 & key);
 }
 
 bool PadTwoDirectionKeyPressed(void)

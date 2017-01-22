@@ -14,16 +14,17 @@
  * 	Defines
  * *************************************/
 
-#define X_SCREEN_RESOLUTION 	384
-#define Y_SCREEN_RESOLUTION 	240
-#define VRAM_W					1024
-#define VRAM_H					512
-#define MAX_SIZE_FOR_GSSPRITE 	256
-#define GFX_TPAGE_WIDTH 		64
-#define GFX_TPAGE_HEIGHT 		256
-#define GFX_1HZ_FLASH			(1<<7)
-#define GFX_2HZ_FLASH			(1<<8)
-#define FULL_LUMINANCE			0xFF
+#define X_SCREEN_RESOLUTION 		384
+#define Y_SCREEN_RESOLUTION 		240
+#define VRAM_W						1024
+#define VRAM_H						512
+#define MAX_SIZE_FOR_GSSPRITE 		256
+#define MAX_SIZE_FOR_GSSPRITE_4BIT 	128
+#define GFX_TPAGE_WIDTH 			64
+#define GFX_TPAGE_HEIGHT 			256
+#define GFX_1HZ_FLASH				(1<<7)
+#define GFX_2HZ_FLASH				(1<<8)
+#define FULL_LUMINANCE				0xFF
 
 /* *************************************
  * 	Global prototypes
