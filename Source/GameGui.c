@@ -35,10 +35,11 @@ enum
 	PAUSE_DIALOG_B3 = PAUSE_DIALOG_B2,
 };
 
+
 enum
 {
 	CLOCK_X = (X_SCREEN_RESOLUTION >> 1) - 48,
-	CLOCK_Y = 16
+	CLOCK_Y = 8
 };
 
 enum
@@ -50,11 +51,11 @@ enum
 
 enum
 {
-	GAME_GUI_WIND_SLOT_PLAYER_ONE_X = 64,
-	GAME_GUI_WIND_SLOT_PLAYER_ONE_Y = 64,
+	GAME_GUI_WIND_SLOT_PLAYER_ONE_X = 16,
+	GAME_GUI_WIND_SLOT_PLAYER_ONE_Y = 24,
 	
-	GAME_GUI_WIND_SLOT_PLAYER_TWO_X = X_SCREEN_RESOLUTION - 86,
-	GAME_GUI_WIND_SLOT_PLAYER_TWO_Y = 64,
+	GAME_GUI_WIND_SLOT_PLAYER_TWO_X = X_SCREEN_RESOLUTION - 104,
+	GAME_GUI_WIND_SLOT_PLAYER_TWO_Y = 24,
 	
 	GAME_GUI_WIND_SLOT_PLAYER_W = 16,
 	GAME_GUI_WIND_SLOT_PLAYER_H = 8
@@ -77,29 +78,41 @@ static GsSprite RightArrowSpr;
 
 static GsSprite PauseSpr;
 
-static GsRectangle WindSlotRect; // Temporary
+static GsSprite TimeTableSpr;
+
+static GsSprite WindSlotSpr[MAX_PLAYERS];
 
 static char * GameFileList[] = {"cdrom:\\DATA\\FONTS\\FONT_1.FNT;1"		,
 								"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\LEFTARR.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\RIGHTARR.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\PAUSE.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\PAUSE.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\TIMETBL.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\WINDPL1.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\WINDPL2.TIM;1"	};
 								
-static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont		,
-								(GsSprite*)&ArrowsSpr		,
-								(GsSprite*)&LeftArrowSpr	,
-								(GsSprite*)&RightArrowSpr	,
-								(GsSprite*)&PauseSpr		};	
+static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont				,
+								(GsSprite*)&ArrowsSpr				,
+								(GsSprite*)&LeftArrowSpr			,
+								(GsSprite*)&RightArrowSpr			,
+								(GsSprite*)&PauseSpr				,
+								(GsSprite*)&TimeTableSpr			,	
+								(GsSprite*)&WindSlotSpr[PLAYER_ONE]	,	
+								(GsSprite*)&WindSlotSpr[PLAYER_TWO]	};	
 
 void GameGuiInit(void)
 {
-	LoadMenu(	GameFileList,
-				GameFileDest,
-				sizeof(GameFileList) / sizeof(char*),
-				sizeof(GameFileDest) /sizeof(void*)	);
+	static bool first_run = true;
 	
-	WindSlotRect.w = GAME_GUI_WIND_SLOT_PLAYER_W;
-	WindSlotRect.h = GAME_GUI_WIND_SLOT_PLAYER_H;
+	if(first_run == true)
+	{
+		first_run = false;
+		
+		LoadMenu(	GameFileList,
+					GameFileDest,
+					sizeof(GameFileList) / sizeof(char*),
+					sizeof(GameFileDest) /sizeof(void*)	);
+	}
 	
 	PauseRect.attribute |= ENABLE_TRANS | TRANS_MODE(0);
 }
@@ -122,7 +135,7 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		
 		GfxSortSprite(&SecondDisplay);
 		
-		PauseSpr.attribute |= GFX_1HZ_FLASH;
+		PauseSpr.attribute |= GFX_2HZ_FLASH;
 		
 		PauseSpr.x = PAUSE_DIALOG_X;
 		PauseSpr.y = PAUSE_DIALOG_Y;
@@ -136,19 +149,24 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 	return false;
 }
 
-void GameGuiClock(uint8_t hour, uint8_t min)
+void GameGuiClock(uint8_t min, uint8_t sec)
 {
 	static char strClock[6]; // HH:MM + \0 (6 characters needed)
 	
 	if(GameStartupFlag || System1SecondTick() == true)
 	{
 		memset(strClock, 0, 6);
-		snprintf(strClock,6,"%02d:%02d",hour, min);
+		snprintf(strClock,6,"%02d:%02d",min, sec);
 	}
+	
+	TimeTableSpr.x = CLOCK_X;
+	TimeTableSpr.y = 0;
+	
+	GfxSortSprite(&TimeTableSpr);
 	
 	RadioFont.flags = FONT_NOFLAGS;
 	RadioFont.max_ch_wrap = 0;
-	FontPrintText(&RadioFont,CLOCK_X,CLOCK_Y,strClock);
+	FontPrintText(&RadioFont,CLOCK_X + 6,CLOCK_Y - 8,strClock);
 }
 
 void GameGuiBeachSign(TYPE_PLAYER * ptrPlayer, uint8_t i)
@@ -202,4 +220,37 @@ void GameGuiBeachSign(TYPE_PLAYER * ptrPlayer, uint8_t i)
 		movement_index[i] = 0;
 	}
 	
+}
+
+void GameGuiWindSlots(TYPE_PLAYER * ptrPlayer, uint8_t id)
+{
+	uint8_t i;
+	short x;
+	short y;
+	
+	if(id == PLAYER_ONE)
+	{
+		x = GAME_GUI_WIND_SLOT_PLAYER_ONE_X;
+		y = GAME_GUI_WIND_SLOT_PLAYER_ONE_Y;
+	}
+	else if(id == PLAYER_TWO)
+	{
+		x = GAME_GUI_WIND_SLOT_PLAYER_TWO_X;
+		y = GAME_GUI_WIND_SLOT_PLAYER_TWO_Y;
+	}
+	else
+	{
+		dprintf("Invalid player ID!\n");
+		return;
+	}
+	
+
+	WindSlotSpr[id].x = x;
+	WindSlotSpr[id].y = y;
+	
+	for(i = 0; i < ptrPlayer->wind_slots; i++)
+	{
+		WindSlotSpr[id].x = x + (i * (WindSlotSpr[id].w + 2));
+		GfxSortSprite(&WindSlotSpr[id]);
+	}
 }

@@ -8,12 +8,10 @@
  * 	Defines								*
  * **************************************/
 
-
-
-#define GAMEPHYSICS_GRAVITY_ACCELERATION 0x2000
-#define GAMEPHYSICS_WIND_DECELERATION 0xA00
-#define GAMEPHYSICS_TACKLE_SPEED (0x7C000)
-#define GAMEPHYSICS_NORMAL_SPEED (0x4000)
+#define GAMEPHYSICS_GRAVITY_ACCELERATION 0x2400
+#define GAMEPHYSICS_WIND_DECELERATION 0x200
+#define GAMEPHYSICS_TACKLE_SPEED (0x3C000)
+#define GAMEPHYSICS_NORMAL_SPEED (0x8000)
 #define GAMEPHYSICS_MAX_NORMAL_SPEED (0x8000) // 8.00
 #define GAMEPHYSICS_LAUNCH_SPEED (-0x60000) // 8.00
 #define GAMEPHYSICS_INITIAL_WAVE_SPEED 0x20000
@@ -26,8 +24,24 @@
 #define BOUNCE_COEF_WAVES 0x4CCC // 0.3
 
 /* **************************************
+ * 	Structs and enums					*
+ * **************************************/
+ 
+enum
+{
+	KILLER_CACTUS_1_X = 0,
+	KILLER_CACTUS_W = 64,
+	KILLER_CACTUS_2_X = LEVEL_X_SIZE - KILLER_CACTUS_W
+};
+
+/* **************************************
  * 	Local variables						*
  * **************************************/
+
+static TYPE_COLLISION collisions[MAX_POSSIBLE_COLLISIONS];
+static TYPE_POINT_INFO point_infos[MAX_POSSIBLE_COLLISIONS - 1]; // -1 because collision between balls don't need it
+static uint8_t num_collisions;
+static uint8_t num_point_infos; 
  
 /* **************************************
  * 	Local prototypes					*
@@ -35,11 +49,9 @@
  
 static void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer);
 static void GamePhysicsTackleHandler(TYPE_PLAYER * ptrPlayer);
+static void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer);
+//static void fix16_print(fix16_t value);
 
-static TYPE_COLLISION collisions[MAX_POSSIBLE_COLLISIONS];
-static TYPE_POINT_INFO point_infos[MAX_POSSIBLE_COLLISIONS - 1]; // -1 because collision between balls don't need it
-static uint8_t num_collisions;
-static uint8_t num_point_infos;
 
 fix16_t GamePhysicsRoundToInt(fix16_t value)
 {
@@ -66,6 +78,13 @@ void GamePhysicsInit(void)
 
 	WaveData[0].speed.y = GAMEPHYSICS_INITIAL_WAVE_SPEED;
 }
+
+/*void fix16_print(fix16_t value)
+{
+ char buff[64];
+	snprintf(buff, 64, "%f", fix16_to_float(value));
+	dprintf("%s\n", buff);
+}*/
 
 TYPE_VECTOR GamePhysicsVectorEscMul(TYPE_VECTOR * ptrVector, fix16_t x)
 {
@@ -329,6 +348,7 @@ void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer)
 	
 	GamePhysicsApplyGravity(ptrPlayer);
 	GamePhysicsTackleHandler(ptrPlayer);
+	GamePhysicsKillerCactus(ptrPlayer);
 }
 
 void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer)
@@ -343,11 +363,6 @@ void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer)
 	{
 		ptrPlayer->position.y = (fix16_from_int(240) - ptrPlayer->radius);
 		ptrPlayer->speed.y = fix16_mul(-ptrPlayer->speed.y, BOUNCE_COEF_WAVES);
-		
-		if(ptrPlayer->StateTackle == true)
-		{
-			dprintf("Was true, set to false!\n");
-		}
 		
 		ptrPlayer->StateTackle = false;
 		ptrPlayer->StateOnWater = true;
@@ -374,10 +389,12 @@ void GamePhysicsCheckCollisions()
 	{
 		ptrPlayer = &PlayerData[j];
 		ptrPlayer->StateOnWater = false;
-		for (i = 0; i < MAX_WAVES && num_collisions < MAX_POSSIBLE_COLLISIONS; ++i)
+		
+		for (i = 0; i < (MAX_WAVES - 1) && num_collisions < MAX_POSSIBLE_COLLISIONS; ++i)
 		{
 			ptrWaveA = &WaveData[i];
 			ptrWaveB = &WaveData[i + 1];
+			
 			if (GamePhysicsCollidePlayerWithWave(	ptrPlayer,
 													ptrWaveA,
 													ptrWaveB,
@@ -481,11 +498,6 @@ void GamePhysicsTackleHandler(TYPE_PLAYER * ptrPlayer)
 		// Verify out of map
 		dprintf("Player dead!\n");
 		
-		if(ptrPlayer->StateTackle == true)
-		{
-			dprintf("Was true, now false!\n");
-		}
-		
 		ptrPlayer->StateTackle = false;
 		ptrPlayer->speed.x = 0;
 		return;
@@ -541,7 +553,7 @@ bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision)
 	{
 		return true;
 	}
-
+	
 	// component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj2Speed), NMag);
 	component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj1Speed), NMag);
 	component = fix16_mul(component, collision->bounceCoeficient);
@@ -607,3 +619,28 @@ void GamePhysicsLeftWindBlow(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	}
 }
 
+void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer)
+{
+	if( (ptrPlayer->position.x + ptrPlayer->speed.x) >= fix16_from_int(KILLER_CACTUS_2_X) )
+	{
+		dprintf("Collision with killer cactus 2!\n");
+		
+		ptrPlayer->speed.x = -ptrPlayer->speed.x;
+		
+		if(--ptrPlayer->lifes_left == 0)
+		{
+			ptrPlayer->dead = true;
+		}
+	}
+	else if( (ptrPlayer->position.x + ptrPlayer->speed.x) <= fix16_from_int(KILLER_CACTUS_1_X + KILLER_CACTUS_W) )
+	{
+		dprintf("Collision with killer cactus 1!\n");
+		
+		ptrPlayer->speed.x = -ptrPlayer->speed.x;
+		
+		if(--ptrPlayer->lifes_left == 0)
+		{
+			ptrPlayer->dead = true;
+		}
+	}
+}

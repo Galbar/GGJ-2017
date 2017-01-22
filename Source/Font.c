@@ -164,12 +164,7 @@ void FontPrintText(TYPE_FONT * ptrFont, short x, short y, char * str, ...)
 					ptrFont->spr.g += 8;
 					ptrFont->spr.b += 8;
 				}
-				else
-				{
-					ptrFont->spr.r = NORMAL_LUMINANCE;
-					ptrFont->spr.g = NORMAL_LUMINANCE;
-					ptrFont->spr.b = NORMAL_LUMINANCE;
-				}
+
 				/*dprintf("char_w = %d, char_h = %d, char_per_row = %d, init_ch: %c\n",
 						ptrFont->char_w,
 						ptrFont->char_h,

@@ -93,6 +93,9 @@ tiles:
 	bmp2tim ../Sprites/Logo.bmp			../cdimg/DATA/SPRITES/LOGO.TIM 8 -org=546,96 -mpink -clut=384,504
 	bmp2tim ../Sprites/Pause.bmp		../cdimg/DATA/SPRITES/PAUSE.TIM 8 -org=768,352 -mpink -clut=384,505
 	bmp2tim ../Sprites/Cactus.bmp		../cdimg/DATA/SPRITES/CACTUS.TIM 16 -org=896,256 -mpink
+	bmp2tim ../Sprites/TimeTbl.bmp		../cdimg/DATA/SPRITES/TIMETBL.TIM 16 -org=800,256 -mpink
+	bmp2tim ../Sprites/WindPl1.bmp		../cdimg/DATA/SPRITES/WINDPL1.TIM 16 -org=546,216 -mpink
+	bmp2tim ../Sprites/WindPl2.bmp		../cdimg/DATA/SPRITES/WINDPL2.TIM 16 -org=562,216 -mpink
 	
 sounds:
 	rm -f ../cdimg/DATA/SOUNDS/*.VAG

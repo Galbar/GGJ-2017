@@ -1,0 +1,9 @@
+Colisión cactus-Win, lose
+Créditos
+Gestión vidas
+Cámara
+Sonido viento
+Sonido impacto
+Sonido pinchazo
+CHOF agua
+Presentación

@@ -13,7 +13,8 @@
 #define BALL_TWO_INIT_POS (fix16_from_int(LEVEL_X_SIZE - 224))
 #define BALL_RADIUS (fix16_from_int(16))
 #define WIND_SLOTS 4
-#define WIND_COOLDOWN_TIME_SECS 2
+#define WIND_COOLDOWN_TIME_SECS 1
+#define INIT_LIFES_LEFT 5
 
 /* **************************************
  * 	Structs and enums					*
@@ -139,14 +140,20 @@ bool GamePause(void)
 void GameInit(void)
 {
 	uint8_t i;
+	static bool first_run = true;
 
 	GameStartupFlag = true;
-
-	LoadMenu(	GameFileList,
+	
+	if(first_run == true)
+	{
+		first_run = false;
+		
+		LoadMenu(	GameFileList,
 				GameFileDest,
 				sizeof(GameFileList) / sizeof(char*),
 				sizeof(GameFileDest) /sizeof(void*)	);
-
+	}
+	
 	GameGuiInit();
 	
 	// Player 1 init
@@ -163,6 +170,7 @@ void GameInit(void)
 	PlayerData[PLAYER_ONE].radius = BALL_RADIUS;
 	PlayerData[PLAYER_ONE].StateOnWater = true;
 	PlayerData[PLAYER_ONE].wind_slots = WIND_SLOTS;
+	PlayerData[PLAYER_ONE].lifes_left = INIT_LIFES_LEFT;
 	
 	//dprintf("Player 1 init DONE!\n");
 	
@@ -180,6 +188,7 @@ void GameInit(void)
 	PlayerData[PLAYER_TWO].radius = BALL_RADIUS;
 	PlayerData[PLAYER_TWO].StateOnWater = true;
 	PlayerData[PLAYER_TWO].wind_slots = WIND_SLOTS;
+	PlayerData[PLAYER_TWO].lifes_left = INIT_LIFES_LEFT;
 	
 	//dprintf("Player 2 init DONE!\n");
 
@@ -237,7 +246,7 @@ void GameInit(void)
 
 	LoadMenuEnd();
 
-	GameSetTime(2,30 /* TODO: Set time by macros?? */);
+	GameSetTime(0,45 /* TODO: Set time by macros?? */);
 }
 
 void GameEmergencyMode(void)
@@ -287,6 +296,7 @@ void GameCalculations(void)
 	GameClock();
 	
 	GamePhysicsCheckCollisions();
+	
 	GamePhysicsResolveCollisions();
 
 	for(i = 0 ; i < MAX_PLAYERS ; i++)
@@ -333,18 +343,22 @@ void GameClock(void)
 {
 	if(System1SecondTick() == true)
 	{
-		if((--GameSeconds) == 0)
+		if(GameSeconds > 0)
 		{
-			GameSeconds = 60;
-
-			if(GameMinutes > 0)
+			GameSeconds--;
+			
+			if(GameSeconds == 0)
 			{
-				GameMinutes--;
-			}
-			else
-			{
-				// Time out!!!
-				timeout_flag = true;
+				if(GameMinutes > 0)
+				{
+					GameMinutes--;
+					GameSeconds = 60;
+				}
+				else
+				{
+					// Time out!!!
+					timeout_flag = true;
+				}
 			}
 		}
 	}
@@ -368,6 +382,7 @@ void GameGraphics(void)
 	{
 		GameRenderBall(&PlayerData[i]);
 		GameGuiBeachSign(&PlayerData[i], i);
+		GameGuiWindSlots(&PlayerData[i], i);
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);
@@ -411,7 +426,7 @@ void GameRenderWaves(void)
 		
 		for(j = 0; j < 4; j++)
 		{
-			WaveGPoly4.b[j] = NORMAL_LUMINANCE >> 1;
+			WaveGPoly4.b[j] = NORMAL_LUMINANCE - 40;
 		}
 		
 		CameraApplyCoordinatesToGsGPoly4(&WaveGPoly4);
