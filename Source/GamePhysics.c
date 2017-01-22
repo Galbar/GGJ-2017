@@ -314,6 +314,7 @@ void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer)
 		if(ptrPlayer->StateOnWater == true)
 		{
 			ptrPlayer->StateOnWater = false;
+			ptrPlayer->StateJump = true;
 			ptrPlayer->speed.y = GAMEPHYSICS_LAUNCH_SPEED; // Jump!!
 		}
 		else if(ptrPlayer->StateTackle == false)
@@ -381,6 +382,7 @@ void GamePhysicsCheckCollisions()
 	TYPE_PLAYER * ptrPlayer;
 	TYPE_WAVE * ptrWaveA;
 	TYPE_WAVE * ptrWaveB;
+	
 	num_collisions = 0;
 	num_point_infos = 0;
 
@@ -405,6 +407,16 @@ void GamePhysicsCheckCollisions()
 													ptrWaveB,
 													&collisions[num_collisions]))
 			{
+				if(ptrPlayer->StateJump == true)
+				{
+					ptrPlayer->StateJump = false;
+					
+					dprintf("SfxPlaySoundVolume(&SplashSnd, 0x3FFF >> (4 + %d))\n",
+							fix16_to_int(ptrPlayer->speed.y));
+					
+					SfxPlaySoundVolume(&SplashSnd, 0x3FFF >> (7 - fix16_to_int(ptrPlayer->speed.y)));
+				}
+				
 				ptrPlayer->StateOnWater = true;
 				ptrPlayer->StateTackle = false;
 				++num_collisions;
@@ -642,6 +654,8 @@ void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer)
 		
 		ptrPlayer->lifes_left--;
 		
+		SfxPlaySound(&DeathSnd);
+		
 		dprintf("Lifes left: %d\n", ptrPlayer->lifes_left);
 		
 		if(ptrPlayer->lifes_left == 0)
@@ -656,6 +670,8 @@ void GamePhysicsKillerCactus(TYPE_PLAYER * ptrPlayer)
 		ptrPlayer->speed.x = -ptrPlayer->speed.x;
 		
 		ptrPlayer->lifes_left--;
+		
+		SfxPlaySound(&DeathSnd);
 		
 		dprintf("Lifes left: %d\n", ptrPlayer->lifes_left);
 		

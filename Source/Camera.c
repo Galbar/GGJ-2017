@@ -92,9 +92,15 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	
 	if(((-Camera.X_Offset) + camera_diff) < 0)
 	{
-		dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
+		//dprintf("Left edge exceeded! %d\n", (Camera.X_Offset + camera_diff));
 		// Do not go too much left!
 		Camera.X_Speed = 0;
+		
+		if( (Camera.X_Offset + 1) < 0)
+		{
+			Camera.X_Offset++;
+		}
+		
 		return;
 	}
 	
@@ -103,7 +109,15 @@ void CameraUpdateSpeed(TYPE_PLAYER * ptrPlayer1, TYPE_PLAYER * ptrPlayer2)
 	if((camera_diff - Camera.X_Offset) >= X_SCREEN_RESOLUTION )
 	{
 		//dprintf("Right edge exceeded!\n");
+		
 		Camera.X_Speed = 0;
+		
+		if( (Camera.X_Offset - 1) > -X_SCREEN_RESOLUTION)
+		{
+			Camera.X_Offset--;
+		}
+		
+		
 		return;
 	}
 	

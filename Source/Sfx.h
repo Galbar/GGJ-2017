@@ -30,6 +30,7 @@ typedef enum t_musicTracks
  * *************************************/
 
 void SfxPlaySound(SsVag * sound);
+void SfxPlaySoundVolume(SsVag * sound, uint16_t volume);
 bool SfxUploadSound(char * file_path, SsVag * vag);
 void SfxPlayTrack(MUSIC_TRACKS track);
 void SfxStopMusic(void);

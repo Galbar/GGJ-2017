@@ -38,6 +38,8 @@
 extern bool GameStartupFlag;
 extern TYPE_PLAYER PlayerData[];
 extern TYPE_WAVE WaveData[];
+extern SsVag SplashSnd;
+extern SsVag DeathSnd;
 
 /* *************************************
  * 	Global prototypes

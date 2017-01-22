@@ -28,6 +28,11 @@ void SfxPlaySound(SsVag * sound)
 	SsPlayVag(sound, sound->cur_voice, MAX_VOLUME, MAX_VOLUME);
 }
 
+void SfxPlaySoundVolume(SsVag * sound, uint16_t volume)
+{
+	SsPlayVag(sound, sound->cur_voice, volume, volume);
+}
+
 bool SfxUploadSound(char * file_path, SsVag * vag)
 {
 	if(SystemLoadFile(file_path) == false)

@@ -115,7 +115,8 @@ static TYPE_CHEAT TestCheat;
 static TYPE_CHEAT StackCheckCheat;
 static GsSprite LogoSpr;
 
-static char * MainMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\MAINMENU.TIM;1"	,
+static char * MainMenuFiles[] = {	"cdrom:\\DATA\\FONTS\\FONT_1.FNT;1"		,
+									"cdrom:\\DATA\\SPRITES\\MAINMENU.TIM;1"	,
 									"cdrom:\\DATA\\SOUNDS\\BELL.VAG;1"		,
 									"cdrom:\\DATA\\SOUNDS\\ACCEPT.VAG;1"	,
 									"cdrom:\\DATA\\SPRITES\\PSXDISK.TIM;1"	,
@@ -128,7 +129,8 @@ static char * MainMenuFiles[] = {	"cdrom:\\DATA\\SPRITES\\MAINMENU.TIM;1"	,
 									"cdrom:\\DATA\\SPRITES\\PARALLAX.TIM;1" ,
 									"cdrom:\\DATA\\SPRITES\\LOGO.TIM;1" 	};
 
-static void * MainMenuDest[] = {	(GsSprite*)&MenuSpr			,
+static void * MainMenuDest[] = {	(TYPE_FONT*)&RadioFont		,
+									(GsSprite*)&MenuSpr			,
 									(SsVag*)&BellSnd			,
 									(SsVag*)&AcceptSnd			,
 									(GsSprite*)&PsxDisk			,
@@ -328,7 +330,7 @@ void MainMenuButtonHandler(void)
 
 		case CREDITS_LEVEL:
 			max_buttons = 0;
-			if(PadOneAnyKeyReleased() == true)
+			if(PadOneKeySinglePressed(PAD_CROSS) == true)
 			{
 				MainMenuRestoreInitValues();
 				max_buttons = MAIN_MENU_PLAY_CREDITS_LEVEL_BUTTONS;
@@ -393,23 +395,23 @@ void MainMenuButtonHandler(void)
 
 void CreditsDraw()
 {
-	SmallFont.spr.r = 0;
-	SmallFont.spr.g = 0;
-	SmallFont.spr.b = 0;
+	RadioFont.spr.r = 0;
+	RadioFont.spr.g = 0;
+	RadioFont.spr.b = 0;
 	
-	FontPrintText(	&SmallFont,
-					X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 5,
+	FontPrintText(	&RadioFont,
+					32,
 					(Y_SCREEN_RESOLUTION/2 + 32) -FONT_DEFAULT_CHAR_SIZE * 2,
 					"Video game made by:\n\n -Xavier Del Campo \n -Javier Maldonado\n -Alessio Linares\n -Aria Serra");
 
-	FontPrintText(	&SmallFont,
-					X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 7,
-					Y_SCREEN_RESOLUTION -FONT_DEFAULT_CHAR_SIZE * 2,
-					"Press any button to return"	);
+	FontPrintText(	&RadioFont,
+					X_SCREEN_RESOLUTION/2 -FONT_DEFAULT_CHAR_SIZE * 8,
+					Y_SCREEN_RESOLUTION - FONT_DEFAULT_CHAR_SIZE * 1,
+					"Press X to return"	);
 					
-	SmallFont.spr.r = NORMAL_LUMINANCE;
-	SmallFont.spr.g = NORMAL_LUMINANCE;
-	SmallFont.spr.b = NORMAL_LUMINANCE;
+	RadioFont.spr.r = NORMAL_LUMINANCE;
+	RadioFont.spr.g = NORMAL_LUMINANCE;
+	RadioFont.spr.b = NORMAL_LUMINANCE;
 	
 }
 

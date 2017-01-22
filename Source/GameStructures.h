@@ -42,6 +42,7 @@ typedef struct t_player
 	bool dead;
 	bool StateOnWater;
 	bool StateTackle;
+	bool StateJump;
 	
 	uint8_t lifes_left;	
 	uint8_t wind_slots;

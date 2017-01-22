@@ -96,6 +96,7 @@ tiles:
 	bmp2tim ../Sprites/TimeTbl.bmp		../cdimg/DATA/SPRITES/TIMETBL.TIM 16 -org=800,256 -mpink
 	bmp2tim ../Sprites/WindPl1.bmp		../cdimg/DATA/SPRITES/WINDPL1.TIM 16 -org=546,216 -mpink
 	bmp2tim ../Sprites/WindPl2.bmp		../cdimg/DATA/SPRITES/WINDPL2.TIM 16 -org=562,216 -mpink
+	bmp2tim ../Sprites/Heart.bmp		../cdimg/DATA/SPRITES/HEART.TIM 16 -org=416,174 -mpink
 	
 sounds:
 	rm -f ../cdimg/DATA/SOUNDS/*.VAG
@@ -104,6 +105,7 @@ sounds:
 	wav2vag ../Sounds/TrayCl.wav 	../cdimg/DATA/SOUNDS/TRAYCL.VAG
 	wav2vag ../Sounds/SpinDisk.wav	../cdimg/DATA/SOUNDS/SPINDISK.VAG
 	wav2vag ../Sounds/Splash.wav	../cdimg/DATA/SOUNDS/SPLASH.VAG
+	wav2vag ../Sounds/Death.wav		../cdimg/DATA/SOUNDS/DEATH.VAG
 
 #music: clean_music music_objects
 

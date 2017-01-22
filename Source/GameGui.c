@@ -61,6 +61,18 @@ enum
 	GAME_GUI_WIND_SLOT_PLAYER_H = 8
 };
 
+enum
+{
+	GAME_GUI_LIFES_PLAYER_ONE_X = 16,
+	GAME_GUI_LIFES_PLAYER_ONE_Y = 48,
+	
+	GAME_GUI_LIFES_PLAYER_TWO_X = X_SCREEN_RESOLUTION - 72,
+	GAME_GUI_LIFES_PLAYER_TWO_Y = 48,
+	
+	GAME_GUI_LIFES_PLAYER_W = 16,
+	GAME_GUI_LIFES_PLAYER_H = 8
+};
+
 /* **************************************
  * 	Local prototypes					*
  * *************************************/
@@ -82,23 +94,25 @@ static GsSprite TimeTableSpr;
 
 static GsSprite WindSlotSpr[MAX_PLAYERS];
 
-static char * GameFileList[] = {"cdrom:\\DATA\\FONTS\\FONT_1.FNT;1"		,
-								"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	,
+static GsSprite HeartSpr;
+
+static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\ARROWS.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\LEFTARR.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\RIGHTARR.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\PAUSE.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\TIMETBL.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\WINDPL1.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\WINDPL2.TIM;1"	};
+								"cdrom:\\DATA\\SPRITES\\WINDPL2.TIM;1"	,
+								"cdrom:\\DATA\\SPRITES\\HEART.TIM;1"	};
 								
-static void * GameFileDest[] = {(TYPE_FONT*)&RadioFont				,
-								(GsSprite*)&ArrowsSpr				,
+static void * GameFileDest[] = {(GsSprite*)&ArrowsSpr				,
 								(GsSprite*)&LeftArrowSpr			,
 								(GsSprite*)&RightArrowSpr			,
 								(GsSprite*)&PauseSpr				,
 								(GsSprite*)&TimeTableSpr			,	
 								(GsSprite*)&WindSlotSpr[PLAYER_ONE]	,	
-								(GsSprite*)&WindSlotSpr[PLAYER_TWO]	};	
+								(GsSprite*)&WindSlotSpr[PLAYER_TWO]	,	
+								(GsSprite*)&HeartSpr				};	
 
 void GameGuiInit(void)
 {
@@ -141,6 +155,16 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer)
 		PauseSpr.y = PAUSE_DIALOG_Y;
 		
 		GfxSortSprite(&PauseSpr);
+		
+		RadioFont.spr.r = 0;
+		RadioFont.spr.g = 0;
+		RadioFont.spr.b = 0;
+		
+		FontPrintText(&RadioFont, 48, 128, "Press X to exit\nSTART to resume");
+		
+		RadioFont.spr.r = NORMAL_LUMINANCE;
+		RadioFont.spr.g = NORMAL_LUMINANCE;
+		RadioFont.spr.b = NORMAL_LUMINANCE;
 		
 		GfxDrawScene_Slow();
 		
@@ -252,5 +276,37 @@ void GameGuiWindSlots(TYPE_PLAYER * ptrPlayer, uint8_t id)
 	{
 		WindSlotSpr[id].x = x + (i * (WindSlotSpr[id].w + 2));
 		GfxSortSprite(&WindSlotSpr[id]);
+	}
+}
+
+void GameGuiLifes(TYPE_PLAYER * ptrPlayer, uint8_t id)
+{
+	uint8_t i;
+	short x;
+	short y;
+	
+	if(id == PLAYER_ONE)
+	{
+		x = GAME_GUI_LIFES_PLAYER_ONE_X;
+		y = GAME_GUI_LIFES_PLAYER_ONE_Y;
+	}
+	else if(id == PLAYER_TWO)
+	{
+		x = GAME_GUI_LIFES_PLAYER_TWO_X;
+		y = GAME_GUI_LIFES_PLAYER_TWO_Y;
+	}
+	else
+	{
+		dprintf("Invalid player ID!\n");
+		return;
+	}
+
+	HeartSpr.x = x;
+	HeartSpr.y = y;
+	
+	for(i = 0; i < ptrPlayer->lifes_left; i++)
+	{
+		HeartSpr.x = x + (i * (HeartSpr.w + 2));
+		GfxSortSprite(&HeartSpr);
 	}
 }

@@ -32,5 +32,6 @@ bool GameGuiPauseDialog(TYPE_PLAYER * ptrPlayer);
 void GameGuiClock(uint8_t min, uint8_t sec);
 void GameGuiBeachSign(TYPE_PLAYER * ptrPlayer, uint8_t i);
 void GameGuiWindSlots(TYPE_PLAYER * ptrPlayer, uint8_t id);
+void GameGuiLifes(TYPE_PLAYER * ptrPlayer, uint8_t id);
 
 #endif //__GAME_GUI_HEADER__

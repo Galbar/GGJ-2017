@@ -48,6 +48,9 @@ TYPE_PLAYER PlayerData[MAX_PLAYERS];
 // Instances for wave-specific data
 TYPE_WAVE WaveData[MAX_WAVES];
 TYPE_WAVE WaveSecondRowData[MAX_SECONDROW_WAVES];
+SsVag SplashSnd;
+SsVag DeathSnd;
+bool exit_gameplay;
 
 /* *************************************
  * 	Local Variables
@@ -58,17 +61,18 @@ static GsSprite PlayerTwoBall;
 static GsSprite KillerCactusSpr;
 static TYPE_TIMER * PlayerOneCooldownTimer;
 static TYPE_TIMER * PlayerTwoCooldownTimer;
-static SsVag SplashSnd;
 
 static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\CACTUS.TIM;1"	,
-								"cdrom:\\DATA\\SPRITES\\SPLASH.VAG;1"	};
+								"cdrom:\\DATA\\SOUNDS\\SPLASH.VAG;1"	,
+								"cdrom:\\DATA\\SOUNDS\\DEATH.VAG;1"		};
 
 static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall	,
 								(GsSprite*)&PlayerTwoBall	,
 								(GsSprite*)&KillerCactusSpr	,
-								(SsVag*)&SplashSnd			};
+								(SsVag*)&SplashSnd			,
+								(SsVag*)&DeathSnd			};
 
 //Game local time
 static uint8_t GameMinutes;
@@ -84,6 +88,11 @@ void Game(void)
 		if(GamePause() == true)
 		{
 			// Exit game
+			break;
+		}
+		
+		if(exit_gameplay == true)
+		{
 			break;
 		}
 
@@ -146,6 +155,8 @@ void GameInit(void)
 	static bool first_run = true;
 
 	GameStartupFlag = true;
+	
+	exit_gameplay = false;
 	
 	if(first_run == true)
 	{
@@ -257,7 +268,7 @@ void GameInit(void)
 
 	LoadMenuEnd();
 
-	GameSetTime(0,45 /* TODO: Set time by macros?? */);
+	GameSetTime(2 /* minutes */, 30 /* seconds */);
 }
 
 void GameEmergencyMode(void)
@@ -304,10 +315,20 @@ void GameCalculations(void)
 {
 	uint8_t i;
 	
+
 	if(	(PlayerData[PLAYER_ONE].dead == true)
 						||
-		(PlayerData[PLAYER_TWO].dead == true)	)
+		(PlayerData[PLAYER_TWO].dead == true)
+						||
+		(timeout_flag == true)				)
 	{
+		if(	(PadOneAnyKeyPressed() == true)
+					||
+			(PadTwoAnyKeyPressed() == true)	)
+		{
+			exit_gameplay = true;
+		}
+		
 		return;
 	}
 
@@ -401,6 +422,7 @@ void GameGraphics(void)
 		GameRenderBall(&PlayerData[i]);
 		GameGuiBeachSign(&PlayerData[i], i);
 		GameGuiWindSlots(&PlayerData[i], i);
+		GameGuiLifes(&PlayerData[i], i);
 		
 		if(PlayerData[i].dead == true)
 		{
@@ -414,6 +436,19 @@ void GameGraphics(void)
 			RadioFont.spr.g = NORMAL_LUMINANCE;
 			RadioFont.spr.b = NORMAL_LUMINANCE;
 		}
+	}
+	
+	if(timeout_flag == true)
+	{
+		RadioFont.spr.r = 0;
+		RadioFont.spr.g = 0;
+		RadioFont.spr.b = 0;
+		
+		FontPrintText(&RadioFont, 148, 48, "Draw!");
+		
+		RadioFont.spr.r = NORMAL_LUMINANCE;
+		RadioFont.spr.g = NORMAL_LUMINANCE;
+		RadioFont.spr.b = NORMAL_LUMINANCE;
 	}
 
 	GameGuiClock(GameMinutes, GameSeconds);
