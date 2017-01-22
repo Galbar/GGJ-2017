@@ -52,6 +52,8 @@ bool GamePhysicsCollidePlayerWithWave(	TYPE_PLAYER * ptrPlayer,
 void GamePhysicsCheckCollisions();
 bool GamePhysicsResolveCollision(TYPE_COLLISION * collision);
 void GamePhysicsResolveCollisions();
+bool GamePhysicsResolveBallAndBallCollision(TYPE_COLLISION * collision);
+bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision);
 void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave);
 void GamePhysicsBallHandler(TYPE_PLAYER * ptrPlayer);
 
