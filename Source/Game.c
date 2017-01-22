@@ -61,18 +61,21 @@ static GsSprite PlayerTwoBall;
 static GsSprite KillerCactusSpr;
 static TYPE_TIMER * PlayerOneCooldownTimer;
 static TYPE_TIMER * PlayerTwoCooldownTimer;
+static SsVag WindSnd;
 
 static char * GameFileList[] = {"cdrom:\\DATA\\SPRITES\\BALL_01.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\BALL_02.TIM;1"	,
 								"cdrom:\\DATA\\SPRITES\\CACTUS.TIM;1"	,
 								"cdrom:\\DATA\\SOUNDS\\SPLASH.VAG;1"	,
-								"cdrom:\\DATA\\SOUNDS\\DEATH.VAG;1"		};
+								"cdrom:\\DATA\\SOUNDS\\DEATH.VAG;1"		,
+								"cdrom:\\DATA\\SOUNDS\\WIND.VAG;1"		};
 
 static void * GameFileDest[] = {(GsSprite*)&PlayerOneBall	,
 								(GsSprite*)&PlayerTwoBall	,
 								(GsSprite*)&KillerCactusSpr	,
 								(SsVag*)&SplashSnd			,
-								(SsVag*)&DeathSnd			};
+								(SsVag*)&DeathSnd			,
+								(SsVag*)&WindSnd			};
 
 //Game local time
 static uint8_t GameMinutes;
@@ -366,6 +369,7 @@ void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)
 		{
 			ptrPlayer->wind_slots--;
 			GamePhysicsRightWindBlow(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
+			SfxPlaySoundVolume(&WindSnd, 0x3FFF >> 2);
 		}
 	}
 	else if(ptrPlayer->PadKeyPressedSingle_Callback(PAD_L1) == true)
@@ -374,6 +378,7 @@ void GamePlayerHandler(TYPE_PLAYER * ptrPlayer)
 		{
 			ptrPlayer->wind_slots--;
 			GamePhysicsLeftWindBlow(&PlayerData[PLAYER_ONE], &PlayerData[PLAYER_TWO]);
+			SfxPlaySoundVolume(&WindSnd, 0x3FFF >> 2);
 		}
 	}
 }

@@ -106,6 +106,7 @@ sounds:
 	wav2vag ../Sounds/SpinDisk.wav	../cdimg/DATA/SOUNDS/SPINDISK.VAG
 	wav2vag ../Sounds/Splash.wav	../cdimg/DATA/SOUNDS/SPLASH.VAG
 	wav2vag ../Sounds/Death.wav		../cdimg/DATA/SOUNDS/DEATH.VAG
+	wav2vag ../Sounds/Wind.wav		../cdimg/DATA/SOUNDS/WIND.VAG
 
 #music: clean_music music_objects
 

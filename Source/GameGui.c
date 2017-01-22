@@ -188,9 +188,18 @@ void GameGuiClock(uint8_t min, uint8_t sec)
 	
 	GfxSortSprite(&TimeTableSpr);
 	
+	RadioFont.spr.r = 0;
+	RadioFont.spr.g = 0;
+	RadioFont.spr.b = 0;
+	
 	RadioFont.flags = FONT_NOFLAGS;
 	RadioFont.max_ch_wrap = 0;
+	
 	FontPrintText(&RadioFont,CLOCK_X + 6,CLOCK_Y - 8,strClock);
+	
+	RadioFont.spr.r = NORMAL_LUMINANCE;
+	RadioFont.spr.g = NORMAL_LUMINANCE;
+	RadioFont.spr.b = NORMAL_LUMINANCE;
 }
 
 void GameGuiBeachSign(TYPE_PLAYER * ptrPlayer, uint8_t i)
