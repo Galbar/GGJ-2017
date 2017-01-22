@@ -52,12 +52,12 @@ void GamePhysicsVectorRoundToInt(TYPE_VECTOR * vector)
 	vector->y = GamePhysicsRoundToInt(vector->y);
 }
 
-static void fix16_print(fix16_t value)
-{
- char buff[64];
-	snprintf(buff, 64, "%f", fix16_to_float(value));
-	dprintf("%s\n", buff);
-}
+// static void fix16_print(fix16_t value)
+// {
+//  char buff[64];
+// 	snprintf(buff, 64, "%f", fix16_to_float(value));
+// 	dprintf("%s\n", buff);
+// }
 
 void GamePhysicsInit(void)
 
@@ -125,6 +125,14 @@ fix16_t GamePhysicsVectorMagnitude(TYPE_VECTOR * ptrVector)
 	fix16_t x = ptrVector->x >> 4;
 	fix16_t y = ptrVector->y >> 4;
 	return fix16_sqrt(fix16_mul(x, x) + fix16_mul(y, y)) << 4;
+}
+
+TYPE_VECTOR GamePhysicsVectorOrthogonal(TYPE_VECTOR * ptrVector)
+{
+	TYPE_VECTOR ortho;
+	ortho.x = ptrVector->y;
+	ortho.y = -ptrVector->x;
+	return ortho;
 }
 
 fix16_t GamePhysicsVectorDist(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVector2)
@@ -348,11 +356,11 @@ void GamePhysicsApplyGravity(TYPE_PLAYER * ptrPlayer)
 
 void GamePhysicsCheckCollisions()
 {
-	// int i;
-	// int j;
-	// TYPE_PLAYER * ptrPlayer;
-	// TYPE_WAVE * ptrWaveA;
-	// TYPE_WAVE * ptrWaveB;
+	int i;
+	int j;
+	TYPE_PLAYER * ptrPlayer;
+	TYPE_WAVE * ptrWaveA;
+	TYPE_WAVE * ptrWaveB;
 	num_collisions = 0;
 	num_point_infos = 0;
 
@@ -362,22 +370,25 @@ void GamePhysicsCheckCollisions()
 		++num_collisions;
 	}
 
-	// for (j = 0; j < MAX_PLAYERS && num_collisions < MAX_POSSIBLE_COLLISIONS; ++j)
-	// {
-	// 	ptrPlayer = &PlayerData[j];
-	// 	for (i = 0; i < MAX_WAVES && num_collisions < MAX_POSSIBLE_COLLISIONS; ++i)
-	// 	{
-	// 		ptrWaveA = &WaveData[i];
-	// 		ptrWaveB = &WaveData[i + 1];
-	// 		if (GamePhysicsCollidePlayerWithWave(	ptrPlayer,
-	// 												ptrWaveA,
-	// 												ptrWaveB,
-	// 												&collisions[num_collisions]))
-	// 		{
-	// 			++num_collisions;
-	// 		}
-	// 	}
-	// }
+	for (j = 0; j < MAX_PLAYERS && num_collisions < MAX_POSSIBLE_COLLISIONS; ++j)
+	{
+		ptrPlayer = &PlayerData[j];
+		ptrPlayer->StateOnWater = false;
+		for (i = 0; i < MAX_WAVES && num_collisions < MAX_POSSIBLE_COLLISIONS; ++i)
+		{
+			ptrWaveA = &WaveData[i];
+			ptrWaveB = &WaveData[i + 1];
+			if (GamePhysicsCollidePlayerWithWave(	ptrPlayer,
+													ptrWaveA,
+													ptrWaveB,
+													&collisions[num_collisions]))
+			{
+				ptrPlayer->StateOnWater = true;
+				ptrPlayer->StateTackle = false;
+				++num_collisions;
+			}
+		}
+	}
 }
 
 void GamePhysicsWaveHandler(TYPE_WAVE * ptrWave)
@@ -506,14 +517,11 @@ bool GamePhysicsResolveBallAndBallCollision(TYPE_COLLISION * collision)
 	component = fix16_mul(component, collision->bounceCoeficient);
 	*collision->ptrObj2Speed = GamePhysicsVectorEscMul(&Nunit, component);
 
-
-	fix16_print(dist);
 	tmp = GamePhysicsVectorEscMul(&Nunit, (dist >> 1));
 	*collision->ptrObj2Position = GamePhysicsVectorAdd(collision->ptrObj2Position, &tmp);
 
 	tmp = GamePhysicsVectorEscMul(&tmp, fix16_from_int(-1));
 	*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &tmp);
-	dist = -(GamePhysicsVectorDist(collision->ptrObj1Position, collision->ptrObj2Position) - collision->obj1Radius - collision->obj2Radius);
 
 	return false;
 
@@ -522,38 +530,25 @@ bool GamePhysicsResolveBallAndBallCollision(TYPE_COLLISION * collision)
 bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision)
 {
 	TYPE_VECTOR N = GamePhysicsVectorDiff(collision->ptrObj2Position, collision->ptrObj1Position);
-	TYPE_VECTOR vNormal;
-	TYPE_VECTOR vTangent;
+	fix16_t component;
+	fix16_t NMag = GamePhysicsVectorMagnitude(&N);
+	TYPE_VECTOR Nunit = N;
 	TYPE_VECTOR tmp;
-	fix16_t angle;
-	fix16_t dist = GamePhysicsVectorMagnitude(&N) - collision->obj1Radius + collision->obj2Radius;
+	fix16_t dist = -(GamePhysicsVectorMagnitude(&N) - collision->obj1Radius - collision->obj2Radius);
+	GamePhysicsVectorNormalize(&Nunit);
 
-	if(dist < 0)
+	if(dist <= 0)
 	{
 		return true;
 	}
 
-	angle = GamePhysicsAngleBetweenVectors(&N, collision->ptrObj1Speed) - fix16_pi;
+	// component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj2Speed), NMag);
+	component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj1Speed), NMag);
+	component = fix16_mul(component, collision->bounceCoeficient);
+	*collision->ptrObj1Speed = GamePhysicsVectorEscMul(&Nunit, component);
 
-	vNormal = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_cos(angle));
-
-	tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_cos(angle));
-	tmp = GamePhysicsVectorAdd(&vNormal, &tmp);
-
-	vNormal = GamePhysicsVectorEscMul(&tmp, -collision->bounceCoeficient);
-
-	vTangent = GamePhysicsVectorEscMul(collision->ptrObj1Speed, fix16_sin(angle));
-
-	tmp = GamePhysicsVectorEscMul(collision->ptrObj2Speed, fix16_sin(angle));
-	tmp = GamePhysicsVectorAdd(&vTangent, &tmp);
-
-	vTangent = GamePhysicsVectorEscMul(&tmp, collision->frictionCoeficient);
-
-	*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &N);
-	*collision->ptrObj1Speed = GamePhysicsVectorAdd(&vNormal, &vTangent);
-
-	GamePhysicsVectorRoundToInt(collision->ptrObj1Position);
-	GamePhysicsVectorRoundToInt(collision->ptrObj1Speed);
+	tmp = GamePhysicsVectorEscMul(&Nunit, -dist);
+	*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &tmp);
 
 	return false;
 }
@@ -580,10 +575,9 @@ void GamePhysicsResolveCollisions()
 		all_solved = true;
 		for (i = 0; i < num_collisions; ++i)
 		{
-			TYPE_COLLISION * collision = &collisions[i];
-			all_solved = all_solved && GamePhysicsResolveCollision(collision);
+			all_solved = all_solved && GamePhysicsResolveCollision(&collisions[i]);
 		}
-	} while(!all_solved );
+	} while(!all_solved);
 
 }
 
