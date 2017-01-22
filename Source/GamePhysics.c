@@ -126,6 +126,11 @@ TYPE_VECTOR GamePhysicsVectorMul(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVect
 	return mul;
 }
 
+fix16_t GamePhysicsVectorCrossProduct(TYPE_VECTOR * ptrVector1, TYPE_VECTOR * ptrVector2)
+{
+	return fix16_mul(ptrVector1->x, ptrVector2->y) - fix16_mul(ptrVector1->y, ptrVector2->x);
+}
+
 void GamePhysicsVectorNormalize(TYPE_VECTOR * ptrVector)
 {
 	fix16_t mag = GamePhysicsVectorMagnitude(ptrVector);
@@ -553,14 +558,22 @@ bool GamePhysicsResolveBallAndWaveCollision(TYPE_COLLISION * collision)
 	{
 		return true;
 	}
-	
-	// component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj2Speed), NMag);
-	component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj1Speed), NMag);
-	component = fix16_mul(component, collision->bounceCoeficient);
-	*collision->ptrObj1Speed = GamePhysicsVectorEscMul(&Nunit, component);
 
-	tmp = GamePhysicsVectorEscMul(&Nunit, -dist);
-	*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &tmp);
+	// Ugly hack for when the ball goes under water
+	if (collision->ptrObj1Position->y > collision->ptrObj2Position->y)
+	{
+		collision->ptrObj1Position->y -= collision->obj1Radius;
+	}
+	else
+	{
+		component = fix16_div(GamePhysicsVectorDot(&N, collision->ptrObj1Speed), NMag);
+		component = fix16_mul(component, collision->bounceCoeficient);
+		*collision->ptrObj1Speed = GamePhysicsVectorEscMul(&Nunit, component);
+
+		tmp = GamePhysicsVectorEscMul(&Nunit, -dist);
+		*collision->ptrObj1Position = GamePhysicsVectorAdd(collision->ptrObj1Position, &tmp);
+	}
+	
 
 	return false;
 }
