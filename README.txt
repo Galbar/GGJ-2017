@@ -9,10 +9,8 @@ ________                 __  .__   ___.          .__  .__
 Installation requirements:
 -ePSXe emulator
 <<<<<<< HEAD
+<<<<<<< HEAD
 -Game ISO: DOWNLOAD HERE!! -> https://www.dropbox.com/s/fi958tjvlahugpn/DeathBall_FINAL.zip?dl=1
-=======
--Game ISO
->>>>>>> fdf7993f0fe4b245beeb1b285ffd0d0ee76c3da0
 
 What is about the game:
 The Death ball game is about two volleyballs fighting each other in a beach until one of them is dead.
