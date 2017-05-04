@@ -31,7 +31,3 @@
 # Debug files
 *.dSYM/
 *.su
-
-# Bin
-*.bin
-*.cue

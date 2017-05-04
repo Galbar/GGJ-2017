@@ -64,7 +64,7 @@ bool SystemGetEmergencyMode(void);
 // (Experimental)
 uint64_t SystemGetGlobalTimer(void);
 // Returns whether critical section of code is being entered
-bool SystemIsBusy(void);
+volatile bool SystemIsBusy(void);
 // Returns whether indicated value is contained inside buffer
 bool SystemContains_u8(uint8_t value, uint8_t * buffer, size_t sz);
 // Overload for uint16_t

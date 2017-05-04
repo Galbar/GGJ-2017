@@ -87,7 +87,6 @@ void GfxSwapBuffers(void)
 		GsSetDispEnv(&DispEnv);
 		GsSetDrawEnv(&DrawEnv);
 	}
-
 }
 
 
@@ -446,6 +445,8 @@ void GfxDrawButton(short x, short y, unsigned short btn)
 
 void GfxSaveDisplayData(GsSprite *spr)
 {
+	while(GfxIsGPUBusy() == true);
+	
 	MoveImage(	DispEnv.x,
 				DispEnv.y,
 				GFX_SECOND_DISPLAY_X,

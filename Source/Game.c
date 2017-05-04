@@ -317,7 +317,12 @@ void GameEmergencyMode(void)
 void GameCalculations(void)
 {
 	uint8_t i;
+	static bool can_exit;
 	
+	if(GameStartupFlag == true)
+	{
+		can_exit = false;
+	}
 
 	if(	(PlayerData[PLAYER_ONE].dead == true)
 						||
@@ -325,9 +330,13 @@ void GameCalculations(void)
 						||
 		(timeout_flag == true)				)
 	{
-		if(	(PadOneAnyKeyPressed() == true)
-					||
-			(PadTwoAnyKeyPressed() == true)	)
+		if( (PadOneAnyKeyPressed() == false)
+					&&
+			(PadTwoAnyKeyPressed() == false)	)
+		{
+			can_exit = true;
+		}
+		else if(can_exit == true)
 		{
 			exit_gameplay = true;
 		}
@@ -396,7 +405,7 @@ void GameClock(void)
 				if(GameMinutes > 0)
 				{
 					GameMinutes--;
-					GameSeconds = 60;
+					GameSeconds = 59;
 				}
 				else
 				{

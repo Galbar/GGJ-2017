@@ -14,6 +14,7 @@
 #define END_STACK_PATTERN (uint32_t) 0x18022015
 #define BEGIN_STACK_ADDRESS (uint32_t*) 0x801FFF00
 #define STACK_SIZE 0x1000
+#define I_MASK (*(unsigned int*)0x1F801074)
 
 /* *************************************
  * 	Local Prototypes
@@ -21,6 +22,9 @@
  
 static void SystemCheckTimer(bool * timer, uint64_t * last_timer, uint8_t step);
 static void SystemSetStackPattern(void);
+
+static void SystemDisableVBlankInterrupt(void);
+static void SystemEnableVBlankInterrupt(void);
 
 /* *************************************
  * 	Local Variables
@@ -41,7 +45,7 @@ static bool five_hundred_ms_timer;
 //Emergency mode flag. Toggled on pad connected/disconnected
 static bool emergency_mode;
 //Critical section is entered (i.e.: when accessing fopen() or other BIOS functions
-static bool system_busy;
+static volatile bool system_busy;
 //Timer array.
 static TYPE_TIMER timer_array[SYSTEM_MAX_TIMERS];
 
@@ -209,7 +213,12 @@ bool SystemLoadFileToBuffer(char * fname, uint8_t * buffer, uint32_t szBuffer)
 	
 	memset(buffer,0,szBuffer);
 	
+	while( (SystemIsBusy() == true) || (GfxIsGPUBusy() == true) );
+	
+	SystemDisableVBlankInterrupt();
+	
 	system_busy = true;
+	
 	f = fopen(fname, "r");
 	
 	if(f == NULL)
@@ -237,6 +246,8 @@ bool SystemLoadFileToBuffer(char * fname, uint8_t * buffer, uint32_t szBuffer)
 	fclose(f);
 	
 	system_busy = false;
+	
+	SystemEnableVBlankInterrupt();
 	
 	dprintf("File \"%s\" loaded successfully!\n",fname);
 	
@@ -275,7 +286,7 @@ bool SystemGetEmergencyMode(void)
 	return emergency_mode;
 }
 
-bool SystemIsBusy(void)
+volatile bool SystemIsBusy(void)
 {
 	return system_busy;
 }
@@ -514,4 +525,14 @@ int32_t SystemIndexOf_U8(uint8_t value, uint8_t * array, uint32_t from, uint32_t
 	}
 	
 	return -1;
+}
+
+void SystemDisableVBlankInterrupt(void)
+{
+	I_MASK &= ~(0x0001);
+}
+
+void SystemEnableVBlankInterrupt(void)
+{
+	I_MASK |= (0x0001);
 }
