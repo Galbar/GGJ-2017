@@ -10,9 +10,8 @@ ________                 __  .__   ___.          .__  .__
 [![Deathball - PSX Game (Global Game Jam Barcelona 2017)](http://img.youtube.com/vi/tPisBxHv-cI/0.jpg)](http://www.youtube.com/watch?v=tPisBxHv-cI "Deathball - PSX Game (Global Game Jam Barcelona 2017")
 
 Installation requirements:
--ePSXe emulator
-
--Game BIN/CUE: Go into "Bin" subfolder.
+* ePSXe emulator
+* Game BIN/CUE: Go into "Bin" subfolder.
 
 What is about the game:
 The Death ball game is about two volleyballs fighting each other in a beach until one of them is dead.
@@ -25,7 +24,7 @@ Keys used in the game:
 control pad to move the ball, X button to bounce, R1 to make wind to the right direction, L1 to make wind to the left direction. 
 
 Installation guide:
--Download the ePSXe emulator.
--Configurate the emulator.
--Load the game image to the emulator.
--Play it and enjoy it.
+* Download the ePSXe emulator.
+* Configurate the emulator.
+* Load the game image to the emulator.
+* Play it and enjoy it.
